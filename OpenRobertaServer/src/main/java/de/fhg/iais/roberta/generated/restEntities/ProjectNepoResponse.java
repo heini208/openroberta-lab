@@ -26,6 +26,7 @@ public class ProjectNepoResponse extends BaseResponse {
     protected boolean errorCounterDefined = false;
     protected Map<String, JSONObject> confAnnos;
     protected String compiledCode;
+    protected JSONObject configuration;
 
     /**
      * the response for the /projectWorkflow/run and ../compileProgram REST request
@@ -71,7 +72,8 @@ public class ProjectNepoResponse extends BaseResponse {
         String progXML,
         int errorCounter,
         Map<String, JSONObject> confAnnos,
-        String compiledCode) {
+        String compiledCode,
+        JSONObject configuration) {
         ProjectNepoResponse entity = new ProjectNepoResponse();
         entity.setCmd(cmd);
         entity.setRc(rc);
@@ -95,6 +97,7 @@ public class ProjectNepoResponse extends BaseResponse {
         entity.setErrorCounter(errorCounter);
         entity.setConfAnnos(confAnnos);
         entity.setCompiledCode(compiledCode);
+        entity.setConfiguration(configuration);
         entity.immutable();
         return entity;
     }
@@ -107,11 +110,10 @@ public class ProjectNepoResponse extends BaseResponse {
     }
 
     /**
-     * merge the properties of a JSON-object into this bean. The bean must be "under construction". The keys of the JSON-Object must be valid. The bean remains
-     * "under construction".<br>
+     * merge the properties of a JSON-object into this bean. The bean must be "under construction".
+     * The keys of the JSON-Object must be valid. The bean remains "under construction".<br>
      * Throws a runtime exception if inconsistencies are detected.
      */
-    @Override
     public ProjectNepoResponse merge(JSONObject jsonO) {
         try {
             for ( String key : JSONObject.getNames(jsonO) ) {
@@ -167,6 +169,8 @@ public class ProjectNepoResponse extends BaseResponse {
                     }
                 } else if ( "compiledCode".equals(key) ) {
                     setCompiledCode(jsonO.getString(key));
+                } else if ( "configuration".equals(key) ) {
+                    setConfiguration(jsonO.getJSONObject(key));
                 } else {
                     throw new RuntimeException("JSON parse error. Found invalid key: " + key + " in " + jsonO);
                 }
@@ -182,7 +186,6 @@ public class ProjectNepoResponse extends BaseResponse {
      * Checks whether all required fields are set. All lists are made immutable.<br>
      * Throws a runtime exception if inconsistencies are detected.
      */
-    @Override
     public ProjectNepoResponse immutable() {
         if ( this.immutable ) {
             return this;
@@ -200,23 +203,26 @@ public class ProjectNepoResponse extends BaseResponse {
         if ( !this.immutable ) {
             _message = "ProjectNepoResponse-object is already immutable: " + toString();
         }
-        if ( this.rc == null ) {
+        if ( rc == null ) {
             _message = "required property rc of ProjectNepoResponse-object is not set: " + toString();
         }
-        if ( this.initToken == null ) {
+        if ( initToken == null ) {
             _message = "required property initToken of ProjectNepoResponse-object is not set: " + toString();
         }
-        if ( !this.serverTimeDefined ) {
+        if ( !serverTimeDefined ) {
             _message = "required property serverTime of ProjectNepoResponse-object is not set: " + toString();
         }
-        if ( this.serverVersion == null ) {
+        if ( serverVersion == null ) {
             _message = "required property serverVersion of ProjectNepoResponse-object is not set: " + toString();
         }
-        if ( !this.errorCounterDefined ) {
+        if ( !errorCounterDefined ) {
             _message = "required property errorCounter of ProjectNepoResponse-object is not set: " + toString();
         }
-        if ( this.compiledCode == null ) {
+        if ( compiledCode == null ) {
             _message = "required property compiledCode of ProjectNepoResponse-object is not set: " + toString();
+        }
+        if ( configuration == null ) {
+            _message = "required property configuration of ProjectNepoResponse-object is not set: " + toString();
         }
         if ( _message != null ) {
             this.immutable = false;
@@ -380,10 +386,30 @@ public class ProjectNepoResponse extends BaseResponse {
     }
 
     /**
+     * GET configuration. Object must be immutable. Never return null or an undefined/default value.
+     */
+    public JSONObject getConfiguration() {
+        if ( !this.immutable ) {
+            throw new RuntimeException("no configuration from an object under construction: " + toString());
+        }
+        return this.configuration;
+    }
+
+    /**
+     * SET configuration. Object must be mutable.
+     */
+    public ProjectNepoResponse setConfiguration(JSONObject configuration) {
+        if ( this.immutable ) {
+            throw new RuntimeException("configuration assigned to an immutable object: " + toString());
+        }
+        this.configuration = configuration;
+        return this;
+    }
+
+    /**
      * generates a JSON-object from an immutable bean.<br>
      * Throws a runtime exception if inconsistencies are detected.
      */
-    @Override
     public JSONObject toJson() {
         if ( !this.immutable ) {
             throw new RuntimeException("no JSON from an object under construction: " + toString());
@@ -444,13 +470,14 @@ public class ProjectNepoResponse extends BaseResponse {
             if ( this.confAnnos != null ) {
                 {
                     JSONObject map = new JSONObject();
-                    for ( Entry<String, JSONObject> entry : this.confAnnos.entrySet() ) {
+                    for ( Entry<String, JSONObject> entry : confAnnos.entrySet() ) {
                         map.put(entry.getKey(), entry.getValue());
                     }
                     jsonO.put("confAnnos", map);
                 }
             }
             jsonO.put("compiledCode", this.compiledCode);
+            jsonO.put("configuration", this.configuration);
         } catch ( JSONException e ) {
             throw new RuntimeException("JSON unparse error when unparsing: " + this, e);
         }
@@ -505,6 +532,8 @@ public class ProjectNepoResponse extends BaseResponse {
             + this.confAnnos
             + ", compiledCode="
             + this.compiledCode
+            + ", configuration="
+            + this.configuration
             + " ]";
     }
 

@@ -8,28 +8,23 @@
 
 package de.fhg.iais.roberta.blockly.generated;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for statement complex type.
+ * <p>Java class for hide complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="statement">
+ * &lt;complexType name="hide">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="block" type="{http://de.fhg.iais.roberta.blockly}block" maxOccurs="unbounded"/>
- *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,44 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "statement", propOrder = {
-    "block"
-})
-public class Statement {
+@XmlType(name = "hide")
+public class Hide {
 
-    @XmlElement(required = true)
-    protected List<Block> block;
     @XmlAttribute(name = "name", required = true)
     protected String name;
-
-    /**
-     * Gets the value of the block property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the block property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getBlock().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Block }
-     * 
-     * 
-     */
-    public List<Block> getBlock() {
-        if (block == null) {
-            block = new ArrayList<Block>();
-        }
-        return this.block;
-    }
+    @XmlAttribute(name = "value", required = true)
+    protected String value;
 
     /**
      * Gets the value of the name property.
@@ -99,6 +63,30 @@ public class Statement {
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the value property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Sets the value of the value property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setValue(String value) {
+        this.value = value;
     }
 
 }
