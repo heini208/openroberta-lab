@@ -162,6 +162,20 @@ define([ 'exports', 'comm' ], function(exports, COMM) {
     }
 
     exports.loadProgramFromListing = loadProgramFromListing;
+     /**
+     * Load all programs owned by given user
+     * 
+     * @param ownerName
+     *            {String} - name of the owner of the program
+     * 
+     */
+      function loadAllPrograms(ownerName, successFn) {
+        COMM.json("/program/listing/all", {
+            "owner" : ownerName,
+        }, successFn, "load programs owned by '" + ownerName + "'");
+    }
+
+    exports.loadAllPrograms = loadAllPrograms;
 
     /**
      * Load the program that to share with the gallery.

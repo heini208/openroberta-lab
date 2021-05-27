@@ -297,6 +297,45 @@ public class ClientProgramController {
     }
 
     @POST
+    @Path("/listing/all")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getInfosOfAllProgramsOfLoggedInUser(@OraData DbSession dbSession, FullRestRequest request) {
+        HttpSessionState httpSessionState = UtilForREST.handleRequestInit(LOG, request, true);
+        try {
+            ListingNamesResponse response = ListingNamesResponse.make();
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            if ( !httpSessionState.isUserLoggedIn() ) {
+                LOG.error("Unauthorized listing request");
+                return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
+            } else {
+                int userId = httpSessionState.getUserId();
+                JSONArray programInfo = programProcessor.getProgramInfoOfAllProgramsOwnedByUser(userId);
+
+                if ( !programProcessor.succeeded() ) {
+                    if ( programProcessor.getMessage().equals(Key.PROGRAM_GET_ALL_ERROR_USER_NOT_FOUND) ) {
+                        return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
+                    } else {
+                        return UtilForREST.makeBaseResponseForError(programProcessor.getMessage(), httpSessionState, null);
+                    }
+                }
+
+                response.setProgramNames(programInfo);
+                UtilForREST.addResultInfo(response, programProcessor);
+                return UtilForREST.responseWithFrontendInfo(response, httpSessionState, null);
+            }
+        } catch ( Exception e ) {
+            dbSession.rollback();
+            String errorTicketId = Util.getErrorTicketId();
+            LOG.error("Exception. Error ticket: {}", errorTicketId, e);
+            return UtilForREST.makeBaseResponseForError(Key.SERVER_ERROR, httpSessionState, null); // TODO: redesign error ticker number and add then: append("parameters", errorTicketId);
+        } finally {
+            if ( dbSession != null ) {
+                dbSession.close();
+            }
+        }
+    }
+    @POST
     @Path("/userGroupMembers/names")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

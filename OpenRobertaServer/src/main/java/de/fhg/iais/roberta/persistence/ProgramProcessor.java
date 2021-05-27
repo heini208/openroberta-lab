@@ -231,7 +231,29 @@ public class ProgramProcessor extends AbstractProcessor {
             return null; // null to indicate, that the default configuration has to be used.
         }
     }
+    /**
+     * Get information about all the programs owned by a user for every robot
+     *
+     * @param ownerId the owner of the program
+     */
+    public JSONArray getProgramInfoOfAllProgramsOwnedByUser(int ownerId){
+        UserDao userDao = new UserDao(this.dbSession);
+        RobotDao robotDao = new RobotDao(this.dbSession);
+        ProgramDao programDao = new ProgramDao(this.dbSession);
+        UserProgramShareDao userProgramShareDao = new UserProgramShareDao(this.dbSession);
+        UserGroupProgramShareDao userGroupProgramShareDao = new UserGroupProgramShareDao(this.dbSession);
+        UserGroupDao userGroupDao = new UserGroupDao(this.dbSession);
+        User owner = userDao.get(ownerId);
 
+        if ( owner == null ) {
+            setStatus(ProcessorStatus.FAILED, Key.PROGRAM_GET_ALL_ERROR_USER_NOT_FOUND, new HashMap<>());
+            return null;
+        }
+        Map<Integer, JSONArray> programInfos = new HashMap<>();
+        List<Program> programs = programDao.loadAll(owner);
+        //WIP
+        return null;
+    }
     /**
      * Get information about all the programs owned by a user and those that are shared with him/her including the programs of group members of those groups,
      * that are owned by the user
