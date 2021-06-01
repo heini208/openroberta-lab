@@ -232,15 +232,13 @@ public class ProgramProcessor extends AbstractProcessor {
         }
     }
     /**
-     * Get information about all the programs owned by a user for every robot
+     * Get information about all the programs owned by a user for every robot needed for exporting
      *
      * @param ownerId the owner of the program
      */
-    public JSONArray getProgramInfoOfAllProgramsOwnedByUser(int ownerId){
+    public JSONArray getProgramsInfoForExport(int ownerId){
         UserDao userDao = new UserDao(this.dbSession);
-        RobotDao robotDao = new RobotDao(this.dbSession);
         ProgramDao programDao = new ProgramDao(this.dbSession);
-        UserProgramShareDao userProgramShareDao = new UserProgramShareDao(this.dbSession);
         UserGroupProgramShareDao userGroupProgramShareDao = new UserGroupProgramShareDao(this.dbSession);
         UserGroupDao userGroupDao = new UserGroupDao(this.dbSession);
         User owner = userDao.get(ownerId);
@@ -251,8 +249,19 @@ public class ProgramProcessor extends AbstractProcessor {
         }
         Map<Integer, JSONArray> programInfos = new HashMap<>();
         List<Program> programs = programDao.loadAll(owner);
+        UserGroup ownersGroup = owner.getUserGroup();
+        
+        for(Program program : programs){
+            JSONArray programInfo = new JSONArray();
+            String config = getProgramsConfig(program);
+            String export = "<export xmlns=\"http://de.fhg.iais.roberta.blockly\"><program>" + program.getProgramText() + "</program><config>"
+            + config + "</config></export>";
+            programInfo.put(program.getName());
+            programInfo.put(export);
+            programInfos.put(program.getId(), programInfo);
+        }
         //WIP
-        return null;
+        return new JSONArray(programInfos.values());
     }
     /**
      * Get information about all the programs owned by a user and those that are shared with him/her including the programs of group members of those groups,

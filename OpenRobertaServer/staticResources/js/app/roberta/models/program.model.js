@@ -170,7 +170,7 @@ define([ 'exports', 'comm' ], function(exports, COMM) {
      * 
      */
       function loadAllPrograms(ownerName, successFn) {
-        COMM.json("/program/listing/all", {
+        COMM.json("/program/exportAllPrograms", {
             "owner" : ownerName,
         }, successFn, "load programs owned by '" + ownerName + "'");
     }
