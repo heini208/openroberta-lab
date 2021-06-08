@@ -1,17 +1,16 @@
 package de.fhg.iais.roberta.javaServer.restServices.all.controller;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -302,71 +301,22 @@ public class ClientProgramController {
             }
         }
     }
+    @GET
+    @Path("/TestExportAllPrograms")
+    //@Produces("text/plain")
+    public Response testExportALlProgrammsOfUser() throws IOException {
+        String myName = "name";
+        InputStream stream = new ByteArrayInputStream(myName.getBytes(StandardCharsets.UTF_8));
 
-    @POST
-    @Path("/exportAllPrograms")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces("application/zip")
-    public Response exportALlProgrammsOfUser(@OraData DbSession dbSession, FullRestRequest request) {
-        HttpSessionState httpSessionState = UtilForREST.handleRequestInit(LOG, request, true);
-        try {
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
-            if ( !httpSessionState.isUserLoggedIn() ) {
-                LOG.error("Unauthorized export request");
-                return null;
-            } else {
-                int userId = httpSessionState.getUserId();
-                JSONArray programInfo = programProcessor.getProgramsInfoForExport(userId);
+        // HttpHeaders headers = new HttpHeaders();
+        // headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        // headers.add("Pragma", "no-cache");
+        // headers.add("Expires", "0");
 
-                // if ( !programProcessor.succeeded() ) {
-                //     if ( programProcessor.getMessage().equals(Key.PROGRAM_GET_ALL_ERROR_USER_NOT_FOUND) ) {
-                //         return null;
-                //     } else {
-                //         return null;
-                //     }
-                // }
-                //ZIP DOWNLOAD WIP
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
-                ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
-                for ( int i = 0; i < programInfo.length(); i++ ) {
-                    JSONArray program = programInfo.getJSONArray(i);
-                    String name = program.getString(0);
-                    String xmlString = program.getString(1);
-                    ZipEntry e = new ZipEntry(name+".xml");
-                    byte[] xml = xmlString.getBytes();
-                    zipOutputStream.putNextEntry(e);
-                    zipOutputStream.write(xml, i, name.length());
-                    zipOutputStream.closeEntry();
-                }  
-                if (zipOutputStream != null) {
-                    zipOutputStream.finish();
-                    zipOutputStream.flush();
-                    zipOutputStream.close();
-                }
-                bufferedOutputStream.close();
-                byteArrayOutputStream.close();
-                //return byteArrayOutputStream.toByteArray();             
-                // zipOutputStream.close();
-                 
-                ResponseBuilder response = Response.ok((Object) byteArrayOutputStream);
-                response.header("Content-Disposition","attachment; filename=server.zip");
-                response.set
-                return response.build();
-                //return byteArrayOutputStream.toByteArray();
-            }
-        } catch ( Exception e ) {
-            dbSession.rollback();
-            String errorTicketId = Util.getErrorTicketId();
-            LOG.error("Exception. Error ticket: {}", errorTicketId, e);
-            return null;
-        } finally {
-            if ( dbSession != null ) {
-                dbSession.close();
-            }
-        }
-    }
-    
+        ResponseBuilder response = Response.ok(stream,"text/plain");
+        return response.header("Content-Disposition", "attachment; filename=\"sample.txt\"").build();
+
+    }     
     //this method checks if exportAllPrograms can be executed and returns error masseges if not
     //does nothing if every check passes
     @POST
@@ -376,19 +326,14 @@ public class ClientProgramController {
     public Response checkConditionsForExport(@OraData DbSession dbSession, FullRestRequest request) {
         HttpSessionState httpSessionState = UtilForREST.handleRequestInit(LOG, request, true);
         try {
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.error("Unauthorized export request");
                 return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
-            } else if ( !programProcessor.succeeded() ) {
-                if ( programProcessor.getMessage().equals(Key.PROGRAM_GET_ALL_ERROR_USER_NOT_FOUND) ) {
-                    return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
-                } else {
-                    return UtilForREST.makeBaseResponseForError(programProcessor.getMessage(), httpSessionState, null);
-                }
-            }
-
-            return null;
+            } 
+            
+            BaseResponse response = BaseResponse.make(); // baseresponse
+            response.setRc(Key.SERVER_SUCCESS.toString());
+            return UtilForREST.responseWithFrontendInfo(response, httpSessionState, null);
         } catch ( Exception e ) {
             dbSession.rollback();
             String errorTicketId = Util.getErrorTicketId();
