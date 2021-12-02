@@ -13,35 +13,39 @@ import de.fhg.iais.roberta.transformer.NepoHide;
 import de.fhg.iais.roberta.transformer.NepoPhrase;
 import de.fhg.iais.roberta.util.dbc.Assert;
 
-/**
- * This class represents the <b>robActions_play_recording</b> block from Blockly into the AST (abstract syntax tree). Object from this class will generate code for
- * stopping every movement of the robot.<br/>
- * <br/>
- */
-@NepoPhrase(containerType = "PLAY_RECORDING_ACTION")
-public class PlayRecordingAction<V> extends Action<V> implements WithUserDefinedPort<V> {
+@NepoPhrase(containerType = "LEDS_OFF_ACTION")
+public class LedsOffAction<V> extends Action<V> implements WithUserDefinedPort<V> {
     @NepoField(name = BlocklyConstants.ACTORPORT, value = BlocklyConstants.EMPTY_PORT)
     public final String port;
+    @NepoField(name = BlocklyConstants.LED, value = BlocklyConstants.EMPTY_PORT)
+    public final String led;
     @NepoHide
     public final Hide hide;
 
-    public PlayRecordingAction(BlockType kind, BlocklyBlockProperties properties, BlocklyComment comment, String port, Hide hide) {
+    public LedsOffAction(BlockType kind, BlocklyBlockProperties properties, BlocklyComment comment, String port, String led, Hide hide) {
         super(kind, properties, comment);
         Assert.nonEmptyString(port);
+        Assert.notNull(led);
         this.hide = hide;
         this.port = port;
+        this.led = led;
         setReadOnly();
     }
 
     /**
-     * Creates instance of {@link PlayRecordingAction}. This instance is read only and can not be modified.
+     * Creates instance of {@link LedsOffAction}. This instance is read only and can not be modified.
      *
      * @param properties of the block (see {@link BlocklyBlockProperties}),
      * @param comment added from the user,
-     * @return read only object of class {@link PlayRecordingAction}
+     * @return read only object of class {@link LedsOffAction}
      */
-    public static <V> PlayRecordingAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port, Hide hide) {
-        return new PlayRecordingAction<>(BlockTypeContainer.getByName("DISPLAY_SET_COLOUR_ACTION"), properties, comment, port, hide);
+    public static <V> LedsOffAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port, String led, Hide hide) {
+        return new LedsOffAction<>(BlockTypeContainer.getByName("LEDS_OFF_ACTION"), properties, comment, port,led, hide);
+    }
+
+
+    public String getLed(){
+        return this.led;
     }
 
     @Override

@@ -20,11 +20,11 @@ import de.fhg.iais.roberta.transformer.Jaxb2ProgramAst;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.dbc.Assert;
 
-public class CyberpiLedBrightnessAction<V> extends Action<V> implements WithUserDefinedPort<V> {
+public class LedBrightnessAction<V> extends Action<V> implements WithUserDefinedPort<V> {
     private final Expr<V> brightness;
     private final String port;
 
-    private CyberpiLedBrightnessAction(Expr<V> brightness, BlocklyBlockProperties properties, BlocklyComment comment, String port) {
+    private LedBrightnessAction(Expr<V> brightness, BlocklyBlockProperties properties, BlocklyComment comment, String port) {
         super(BlockTypeContainer.getByName("CYBERPI_SET_BRIGHTNESS_ACTION"), properties, comment);
         Assert.notNull(brightness);
         Assert.notNull(port);
@@ -34,14 +34,14 @@ public class CyberpiLedBrightnessAction<V> extends Action<V> implements WithUser
     }
 
     /**
-     * Creates instance of {@link CyberpiLedBrightnessAction}. This instance is read only and can not be modified.
+     * Creates instance of {@link LedBrightnessAction}. This instance is read only and can not be modified.
      *
      * @param properties of the block (see {@link BlocklyBlockProperties}),
      * @param comment added from the user,
-     * @return read only object of class {@link CyberpiLedBrightnessAction}
+     * @return read only object of class {@link LedBrightnessAction}
      */
-    private static <V> CyberpiLedBrightnessAction<V> make(Expr<V> brightness, BlocklyBlockProperties properties, BlocklyComment comment, String port) {
-        return new CyberpiLedBrightnessAction<>(brightness, properties, comment, port);
+    private static <V> LedBrightnessAction<V> make(Expr<V> brightness, BlocklyBlockProperties properties, BlocklyComment comment, String port) {
+        return new LedBrightnessAction<>(brightness, properties, comment, port);
     }
 
     public Expr<V> getBrightness() {
@@ -71,7 +71,7 @@ public class CyberpiLedBrightnessAction<V> extends Action<V> implements WithUser
 
         Phrase<V> brightness = helper.extractValue(values, new ExprParam(BlocklyConstants.BRIGHTNESS, BlocklyType.NUMBER_INT));
         String port = Jaxb2Ast.extractField(fields, BlocklyConstants.ACTORPORT);
-        return CyberpiLedBrightnessAction.make(Jaxb2Ast.convertPhraseToExpr(brightness), Jaxb2Ast.extractBlockProperties(block), Jaxb2Ast.extractComment(block), port);
+        return LedBrightnessAction.make(Jaxb2Ast.convertPhraseToExpr(brightness), Jaxb2Ast.extractBlockProperties(block), Jaxb2Ast.extractComment(block), port);
     }
 
     @Override
