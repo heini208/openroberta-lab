@@ -214,6 +214,10 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         nlIndent();
         this.sb.append("raise");
         decrIndentation();
+        nlIndent();
+        this.sb.append("mbot2.motor_stop(\"all\")");
+        nlIndent();
+        this.sb.append("mbot2.EM_stop(\"all\")");
         decrIndentation();
         nlIndent();
 
@@ -383,7 +387,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         String mode = quadRGBSensor.mode;
         switch ( mode ) {
             case "LINE":
-                this.sb.append("mbuild.quad_rgb_sensor.get_line_sta(\"all\" ").append(index).append(")");
+                this.sb.append("mbuild.quad_rgb_sensor.get_line_sta(\"all\", ").append(index).append(")");
                 break;
             case SC.COLOUR:
                 this.sb.append("_colors[")
