@@ -20,7 +20,8 @@ import de.fhg.iais.roberta.blockly.generated.Statement;
 import de.fhg.iais.roberta.blockly.generated.Value;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.ConfigurationComponent;
-import de.fhg.iais.roberta.components.ConfigurationComponentList;
+import de.fhg.iais.roberta.components.ConfigurationComponentLeaf;
+import de.fhg.iais.roberta.components.ConfigurationComponentNode;
 import de.fhg.iais.roberta.factory.BlocklyDropdownFactory;
 import de.fhg.iais.roberta.syntax.BlocklyBlockProperties;
 import de.fhg.iais.roberta.syntax.BlocklyComment;
@@ -89,7 +90,7 @@ public final class Jaxb2ConfigurationAst {
                 properties.put(fKey, fValue);
             }
             ConfigurationComponent configComp =
-                new ConfigurationComponent(
+                new ConfigurationComponentLeaf(
                     factory.getConfigurationComponentTypeByBlocklyName(blocklyName),
                     isActor,
                     portName,
@@ -134,7 +135,7 @@ public final class Jaxb2ConfigurationAst {
         LinkedHashMap<String, List<ConfigurationComponent>> subcomponents = new LinkedHashMap<>();
         List<Statement> statements = block.getStatement();
         if ( statements.size() == 0 ) {
-            return new ConfigurationComponent(
+            return new ConfigurationComponentLeaf(
                 componentType,
                 true,
                 userDefinedName,
@@ -154,7 +155,7 @@ public final class Jaxb2ConfigurationAst {
             subcomponents.put(statement.getName(), subBlocks);
         }
 
-        return new ConfigurationComponentList(
+        return new ConfigurationComponentNode(
             componentType,
             true,
             userDefinedName,
@@ -214,7 +215,7 @@ public final class Jaxb2ConfigurationAst {
                 throw new DbcException("Could not find matching constructor for " + className, e);
             }
         } else {
-            return new ConfigurationComponent(
+            return new ConfigurationComponentLeaf(
                 componentType,
                 true,
                 userDefinedName,

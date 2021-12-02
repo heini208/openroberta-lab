@@ -9,10 +9,10 @@ import de.fhg.iais.roberta.syntax.BlocklyBlockProperties;
 import de.fhg.iais.roberta.syntax.BlocklyComment;
 import de.fhg.iais.roberta.transformer.Ast2Jaxb;
 
-public class ConfigurationComponentList extends ConfigurationComponent {
+public class ConfigurationComponentNode extends ConfigurationComponent {
     private final LinkedHashMap<String, List<ConfigurationComponent>> subComponents;
 
-    public ConfigurationComponentList(
+    public ConfigurationComponentNode(
         String componentType,
         boolean isActor,
         String internalPortName,
@@ -27,6 +27,7 @@ public class ConfigurationComponentList extends ConfigurationComponent {
         this.subComponents = subComponents;
     }
 
+    @Override
     public LinkedHashMap<String, List<ConfigurationComponent>> getSubComponents() {
         return subComponents;
     }
@@ -36,11 +37,7 @@ public class ConfigurationComponentList extends ConfigurationComponent {
         Block destination = new Block();
         Ast2Jaxb.setBasicProperties(this, destination);
         Ast2Jaxb.addField(destination, "NAME", getUserDefinedPortName());
-        subComponents.forEach((statement, subComponents) -> {
-            for ( ConfigurationComponent subcomp : subComponents ) {
-                Ast2Jaxb.addStatement(destination, statement, subcomp);
-            }
-        });
+        subComponents.forEach((statement, subComponents) -> Ast2Jaxb.addConfigurationComponents(destination, statement, subComponents));
         getComponentProperties().forEach((key, value) -> Ast2Jaxb.addField(destination, key, value));
         return destination;
     }
