@@ -7,18 +7,21 @@ import com.google.common.collect.ClassToInstanceMap;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.ConfigurationComponent;
+import de.fhg.iais.roberta.components.UsedActor;
+import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.CyberpiConstants;
 import de.fhg.iais.roberta.syntax.MotionParam;
 import de.fhg.iais.roberta.syntax.MotorDuration;
 import de.fhg.iais.roberta.syntax.Phrase;
+import de.fhg.iais.roberta.syntax.SC;
 import de.fhg.iais.roberta.syntax.action.Action;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
-import de.fhg.iais.roberta.syntax.action.mbot2.CyberpiLedBrightnessAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
 import de.fhg.iais.roberta.syntax.action.mbot2.DisplaySetColourAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
-import de.fhg.iais.roberta.syntax.action.light.LightAction;
-import de.fhg.iais.roberta.syntax.action.light.LightStatusAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOnAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.Ultrasonic2LEDAction;
@@ -43,7 +46,9 @@ import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.QuadRGBSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord;
 import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisitor;
 import de.fhg.iais.roberta.syntax.action.motor.differential.DriveAction;
 
@@ -60,6 +65,11 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
     }
 
     @Override
+    public Void visitJoystick(Joystick<Void> joystick) {
+        return null;
+    }
+
+    @Override
     public Void visitKeysSensor(KeysSensor<Void> keysSensor) {
         return null;
     }
@@ -71,6 +81,11 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
 
     @Override
     public Void visitSoundSensor(SoundSensor<Void> soundSensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitSoundRecord(SoundRecord<Void> soundRecord) {
         return null;
     }
 
@@ -107,12 +122,14 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
 
     @Override
     public Void visitQuadRGBSensor(QuadRGBSensor<Void> quadRGBSensor) {
-        usedMethodBuilder.addUsedMethod(Mbot2Methods.GETRGB);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(quadRGBSensor.getUserDefinedPort(), CyberpiConstants.QUADRGBSENSOR, quadRGBSensor.mode));
         return null;
     }
 
     @Override
     public Void visitQuadRGBLightOnAction(QuadRGBLightOnAction<Void> quadRGBLightOnAction) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(quadRGBLightOnAction.getUserDefinedPort(), CyberpiConstants.QUADRGBSENSOR));
+        usedMethodBuilder.addUsedMethod(Mbot2Methods.RGBASSTRING);
         requiredComponentVisited(quadRGBLightOnAction, quadRGBLightOnAction.getColor());
         return null;
     }
@@ -128,17 +145,17 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
     }
 
     @Override
-    public Void visitLightAction(LightAction<Void> lightAction) {
+    public Void visitLedOnActionWithIndex(LedOnActionWithIndex<Void> ledOnActionWithIndex) {
         return null;
     }
 
     @Override
-    public Void visitLightStatusAction(LightStatusAction<Void> lightStatusAction) {
+    public Void visitLedsOffAction(LedsOffAction<Void> ledsOffAction) {
         return null;
     }
 
     @Override
-    public Void visitCyberpiLedBrightnessAction(CyberpiLedBrightnessAction<Void> cyberpiLedBrightnessAction) {
+    public Void visitLedBrightnessAction(LedBrightnessAction<Void> ledBrightnessAction) {
         return null;
     }
 
@@ -182,13 +199,12 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
         return null;
     }
 
-    private Void hasDifferentialDriveCheck(Phrase<Void> driveAction) {
+    private void hasDifferentialDriveCheck(Phrase<Void> driveAction) {
         ConfigurationComponent differentialDrive = getDifferentialDrive();
         if ( differentialDrive == null || differentialDrive.getOptProperty("MOTOR_L").equals(differentialDrive.getOptProperty("MOTOR_R")) ) {
             //error has no differentialdrive
             addErrorToPhrase(driveAction, "");
         }
-        return null;
     }
 
     private ConfigurationComponent getDifferentialDrive() {
@@ -201,13 +217,13 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
         return null;
     }
 
-    private Void hasEncodersOnDifferentialDriveCheck(Phrase<Void> driveAction) {
+    private void hasEncodersOnDifferentialDriveCheck(Phrase<Void> driveAction) {
         Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
         ConfigurationComponent differentialDrive = getDifferentialDrive();
         if ( differentialDrive == null ) {
             //error has no differentialdrive
             addErrorToPhrase(driveAction, "");
-            return null;
+            return;
         }
         int numLeftMotors = 0;
         int numRightMotors = 0;
@@ -221,13 +237,12 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
             }
             if ( numRightMotors > 1 || numLeftMotors > 1 ) {
                 addErrorToPhrase(driveAction, "");
-                return null;
+                return;
             }
         }
         if ( numRightMotors != 1 || numLeftMotors != 1 ) {
             addErrorToPhrase(driveAction, "CONFIGURATION_ERROR_MOTOR_MISSING");
         }
-        return null;
     }
 
     private void checkAndVisitMotionParam(Action<Void> action, MotionParam<Void> param) {
@@ -281,6 +296,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
 
     @Override
     public Void visitTimerSensor(TimerSensor<Void> timerSensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(timerSensor.getUserDefinedPort(), SC.TIMER, timerSensor.getMode()));
         return null;
     }
 

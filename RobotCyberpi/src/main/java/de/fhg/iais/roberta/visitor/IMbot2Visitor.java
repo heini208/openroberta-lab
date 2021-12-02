@@ -2,8 +2,10 @@ package de.fhg.iais.roberta.visitor;
 
 import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.light.LightStatusAction;
-import de.fhg.iais.roberta.syntax.action.mbot2.CyberpiLedBrightnessAction;
-import de.fhg.iais.roberta.syntax.action.mbot2.CyberpiLedOnAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
 import de.fhg.iais.roberta.syntax.action.mbot2.DisplaySetColourAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOffAction;
@@ -18,6 +20,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.QuadRGBSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord;
 import de.fhg.iais.roberta.visitor.hardware.actor.IActors4AutonomousDriveRobots;
 import de.fhg.iais.roberta.visitor.hardware.sensor.ISensorVisitor;
 
@@ -26,11 +29,15 @@ import de.fhg.iais.roberta.visitor.hardware.sensor.ISensorVisitor;
  */
 public interface IMbot2Visitor<V> extends IActors4AutonomousDriveRobots<V>, ISensorVisitor<V> {
 
+    V visitJoystick(Joystick<V> joystick);
+
     V visitKeysSensor(KeysSensor<V> keysSensor);
 
     V visitEncoderSensor(EncoderSensor<V> encoderSensor);
 
     V visitSoundSensor(SoundSensor<V> soundSensor);
+
+    V visitSoundRecord(SoundRecord<V> soundRecord);
 
     V visitLightSensor(LightSensor<V> lightSensor);
 
@@ -52,14 +59,21 @@ public interface IMbot2Visitor<V> extends IActors4AutonomousDriveRobots<V>, ISen
 
     V visitUltrasonic2LEDAction(Ultrasonic2LEDAction<V> ultrasonic2LEDAction);
 
-    V visitLightStatusAction(LightStatusAction<V> lightStatusAction);
+    V visitLedsOffAction(LedsOffAction<V> ledsOffAction);
 
-    V visitCyberpiLedBrightnessAction (CyberpiLedBrightnessAction<V> cyberpiLedBrightnessAction);
+    V visitLedBrightnessAction(LedBrightnessAction<V> ledBrightnessAction);
 
     default V visitSerialWriteAction(SerialWriteAction<V> serialWriteAction) {
         return null;
     }
 
-    V visitLightAction(LightAction<V> lightAction);
+    V visitLedOnActionWithIndex(LedOnActionWithIndex<V> ledOnActionWithIndex);
 
+    default V visitLightAction(LightAction<V> lightAction) {
+        return null;
+    }
+
+    default V visitLightStatusAction(LightStatusAction<V> lightStatusAction) {
+        return null;
+    }
 }

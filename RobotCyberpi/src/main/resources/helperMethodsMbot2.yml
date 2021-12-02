@@ -9,7 +9,7 @@ DIFFDRIVEFOR:
         speedR = rpmR * _circumference / 60
         r = (speedL + speedR) * _trackWidth / 2
         w = speedR / speedL / _trackWidth
-        timeToWait = math.abs(distance / (r * w))
+        timeToWait = abs(distance / (r * w))
         if _diffPortsSwapped:
             mbot2.drive_speed(-rpmR, RpmL)
         else:
@@ -17,20 +17,14 @@ DIFFDRIVEFOR:
         time.sleep(timeToWait)
         mbot2.EM_stop()
 
-GETRGB:
+RGBASSTRING:
   PYTHON: |
-    def _getRGB(str):
-        _colors = {
-            "red": (204,0,0),
-            "orange": (255,102,0),
-            "yellow": (255,255,0),
-            "green": (51,204,0),
-            "cyan": (51,255,255),
-            "blue": (51,102,255),
-            "purple": (204,51,204),
-            "white": (255,255,255),
-            "black": (0,0,0)
-        }
-        return _colors[str]
-
+    def _RGBAsString(rgb):
+        r, g, b = rgb
+        color_diffs = []
+        for color in _colors:
+            cr, cg, cb = _colors[color]
+            color_diff = math.sqrt(abs(r - cr)**2 + abs(g - cg)**2 + abs(b - cb)**2)
+            color_diffs.append((color_diff, color))
+        return min(color_diffs)[1]
 

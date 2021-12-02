@@ -1,17 +1,17 @@
 package de.fhg.iais.roberta.visitor;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ClassToInstanceMap;
 
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
+import de.fhg.iais.roberta.bean.UsedHardwareBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.ConfigurationComponent;
-import de.fhg.iais.roberta.components.ConfigurationComponentList;
+import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.CyberpiConstants;
 import de.fhg.iais.roberta.inter.mode.action.IDriveDirection;
 import de.fhg.iais.roberta.inter.mode.action.ILanguage;
@@ -19,12 +19,13 @@ import de.fhg.iais.roberta.syntax.MotionParam;
 import de.fhg.iais.roberta.syntax.MotorDuration;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
-import de.fhg.iais.roberta.syntax.action.mbot2.CyberpiLedBrightnessAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
 import de.fhg.iais.roberta.syntax.action.mbot2.DisplaySetColourAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
-import de.fhg.iais.roberta.syntax.action.light.LightAction;
-import de.fhg.iais.roberta.syntax.action.light.LightStatusAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOnAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.Ultrasonic2LEDAction;
@@ -60,6 +61,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.QuadRGBSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
@@ -71,8 +73,7 @@ import de.fhg.iais.roberta.syntax.SC;
  */
 public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements IMbot2Visitor<Void> {
 
-    private ILanguage language;
-    private ConfigurationAst configurationAst;
+    private final ConfigurationAst configurationAst;
     private String rightMotorPort;
 
     /**
@@ -82,12 +83,10 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
      */
     public Mbot2PythonVisitor(
         List<List<Phrase<Void>>> programPhrases,
-        ILanguage language,
         ClassToInstanceMap<IProjectBean> beans,
         ConfigurationAst configurationAst) {
         super(programPhrases, beans);
         this.configurationAst = configurationAst;
-        this.language = language;
         setRightMotorPort();
     }
 
@@ -104,6 +103,18 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         this.sb.append("import time"); //TODO maybe only if time is required
         nlIndent();
         appendRobotVariables();
+        nlIndent();
+        generateTimerVariables();
+        nlIndent();
+        addColors();
+        if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
+            String helperMethodImpls =
+                this
+                    .getBean(CodeGeneratorSetupBean.class)
+                    .getHelperMethodGenerator()
+                    .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
+            this.sb.append(helperMethodImpls);
+        }
     }
 
     private void appendRobotVariables() {
@@ -119,6 +130,48 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
             nlIndent();
             this.sb.append("_diffPortsSwapped = ");
             this.sb.append(this.rightMotorPort.equals("EM1") ? "True" : "False");
+        }
+    }
+
+    private void generateTimerVariables() {
+        this
+            .getBean(UsedHardwareBean.class)
+            .getUsedSensors()
+            .stream()
+            .filter(usedSensor -> usedSensor.getType().equals(SC.TIMER))
+            .collect(Collectors.groupingBy(UsedSensor::getPort))
+            .keySet()
+            .forEach(port -> {
+                this.usedGlobalVarInFunctions.add("_timer" + port);
+                this.sb.append("_timer").append(port).append(" = cyberpi.timer.get()");
+                nlIndent();
+            });
+    }
+
+    private void addColors() {
+        int colorBlocks = (int) this.getBean(UsedHardwareBean.class).getUsedSensors()
+            .stream()
+            .filter(usedSensor -> usedSensor.getType().equals(CyberpiConstants.QUADRGBSENSOR)
+                && usedSensor.getMode().equals(SC.COLOUR))
+            .count();
+        colorBlocks += this.getBean(UsedHardwareBean.class).getUsedActors()
+            .stream()
+            .filter(usedSensor -> usedSensor.getType().equals(CyberpiConstants.QUADRGBSENSOR))
+            .count();
+
+        if ( colorBlocks != 0 ) {
+            nlIndent();
+            this.sb.append("_colors = {\n" +
+                "            \"red\": (204,0,0),\n" +
+                "            \"yellow\": (255,255,0),\n" +
+                "            \"green\": (51,204,0),\n" +
+                "            \"cyan\": (51,255,255),\n" +
+                "            \"blue\": (51,102,255),\n" +
+                "            \"purple\": (204,51,204),\n" +
+                "            \"white\": (255,255,255),\n" +
+                "            \"black\": (0,0,0)\n" +
+                "        }");
+            nlIndent();
         }
     }
 
@@ -164,16 +217,6 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         decrIndentation();
         nlIndent();
 
-        if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
-            String helperMethodImpls =
-                this
-                    .getBean(CodeGeneratorSetupBean.class)
-                    .getHelperMethodGenerator()
-                    .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
-            this.sb.append(helperMethodImpls);
-        }
-
-        nlIndent();
         this.sb.append("main()");
     }
 
@@ -186,6 +229,21 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
         this.sb.append("\"").append(pin1).append("\"");
         this.sb.append(")");
+        return null;
+    }
+
+    @Override
+    public Void visitJoystick(Joystick<Void> joystick) {
+        this.sb.append("cyberpi.controller.is_press(\"");
+        String slot = joystick.slot.toLowerCase();
+        if ( slot.equals("center") ) {
+            this.sb.append("middle");
+        } else if ( slot.equals("any") ) {
+            this.sb.append("any_direction");
+        } else {
+            this.sb.append(slot);
+        }
+        this.sb.append("\")");
         return null;
     }
 
@@ -204,31 +262,38 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     }
 
     @Override
-    public Void visitLightAction(LightAction<Void> lightAction) {
+    public Void visitLedOnActionWithIndex(LedOnActionWithIndex<Void> ledOnActionWithIndex) {
         this.sb.append("cyberpi.led.on(");
-        //lightAction.getRgbLedColor();
-        //lightAction.getColor().accept(this);
-        this.sb.append("[0], ");
-        //lightAction.getColor().accept(this);
-        this.sb.append("[1], ");
-        //lightAction.getColor().accept(this);
-        //todo
-        this.sb.append("[2]");
-        return null;
-    }
-
-    @Override
-    public Void visitLightStatusAction(LightStatusAction<Void> lightStatusAction) {
-        //todo
-        return null;
-    }
-
-    @Override
-    public Void visitCyberpiLedBrightnessAction(CyberpiLedBrightnessAction<Void> cyberpiLedBrightnessAction) {
-        this.sb.append("cyberpi.led.set_bri(");
-        cyberpiLedBrightnessAction.getBrightness().accept(this);
+        appendRGBAsArguments(ledOnActionWithIndex.color);
+        this.sb.append(", ");
+        appendLedNumber(ledOnActionWithIndex.getLed());
         this.sb.append(")");
         return null;
+    }
+
+    @Override
+    public Void visitLedsOffAction(LedsOffAction<Void> ledsOffAction) {
+        this.sb.append("cyberpi.led.off(");
+        appendLedNumber(ledsOffAction.getLed());
+        this.sb.append(")");
+        return null;
+    }
+
+    @Override
+    public Void visitLedBrightnessAction(LedBrightnessAction<Void> ledBrightnessAction) {
+        this.sb.append("cyberpi.led.set_bri(");
+        ledBrightnessAction.getBrightness().accept(this);
+        this.sb.append(")");
+        return null;
+    }
+
+    private void appendLedNumber(String led) {
+        led = led.replace("LED", "").toLowerCase();
+        if ( led.equals("all") ) {
+            this.sb.append("\"").append(led).append("\"");
+        } else {
+            this.sb.append(led);
+        }
     }
 
     private String getPortFromConfig(String name) {
@@ -256,7 +321,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     @Override
     public Void visitShowTextAction(ShowTextAction<Void> showTextAction) {
 
-        if ( showTextAction.y instanceof EmptyExpr<?> && showTextAction.x instanceof EmptyExpr<?>) {
+        if ( showTextAction.y instanceof EmptyExpr<?> && showTextAction.x instanceof EmptyExpr<?> ) {
             appendPrintlnAction(showTextAction);
         } else {
             appendShowTextAction(showTextAction);
@@ -291,19 +356,18 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     @Override
     public Void visitDisplaySetColourAction(DisplaySetColourAction<Void> displaySetColourAction) {
         this.sb.append("cyberpi.display.set_brush(");
-        appendStringOrRGB(displaySetColourAction.getColor());
+        appendRGBAsArguments(displaySetColourAction.getColor());
         this.sb.append(")");
         return null;
     }
 
-    private void appendStringOrRGB(Expr<Void> color) {
+    private void appendRGBAsArguments(Expr<Void> color) {
         color.accept(this);
         this.sb.append("[0], ");
         color.accept(this);
         this.sb.append("[1], ");
         color.accept(this);
         this.sb.append("[2]");
-        this.sb.append(")");
     }
 
     @Override
@@ -316,19 +380,19 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     @Override
     public Void visitQuadRGBSensor(QuadRGBSensor<Void> quadRGBSensor) {
         int index = getSensorNumber(CyberpiConstants.QUADRGB, quadRGBSensor.getUserDefinedPort());
-        String mode = quadRGBSensor.getMode();
+        String mode = quadRGBSensor.mode;
         switch ( mode ) {
             case "LINE":
                 this.sb.append("mbuild.quad_rgb_sensor.get_line_sta(\"all\" ").append(index).append(")");
                 break;
             case SC.COLOUR:
-                this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(Mbot2Methods.GETRGB))
-                    .append("(").append("mbuild.quad_rgb_sensor.get_color_sta(").append("\"")
-                    .append(quadRGBSensor.getSlot()).append("\", ").append(index).append(")")
-                    .append(")");
+                this.sb.append("_colors[")
+                    .append("mbuild.quad_rgb_sensor.get_color_sta(").append("\"")
+                    .append(quadRGBSensor.slot).append("\", ").append(index).append(")")
+                    .append("]");
                 break;
             case SC.AMBIENTLIGHT:
-                this.sb.append("mbuild.quad_rgb_sensor.get_light(").append("\"").append(quadRGBSensor.getSlot()).append("\", ").append(index).append(")");
+                this.sb.append("mbuild.quad_rgb_sensor.get_light(").append("\"").append(quadRGBSensor.slot).append("\", ").append(index).append(")");
                 break;
             case SC.RGB:
                 this.sb.append("[").append(getRGBString("red", index, quadRGBSensor)).append(", ")
@@ -343,11 +407,13 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     public Void visitQuadRGBLightOnAction(QuadRGBLightOnAction<Void> quadRGBLightOnAction) {
         int index = getSensorNumber(CyberpiConstants.QUADRGB, quadRGBLightOnAction.getUserDefinedPort());
         this.sb.append("mbuild.quad_rgb_sensor.set_led(");
-
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(Mbot2Methods.RGBASSTRING));
+        this.sb.append("(");
+        quadRGBLightOnAction.getColor().accept(this);
+        this.sb.append(")");
         //Todo does not work hex colour is not suported even though its stated by api only specific colour names
         //appendHexColour(quadRGBLightOnAction.getColor());
         //possible workaround using def: hex to str
-        this.sb.append("\"w\"");
         this.sb.append(", ").append(index).append(")");
         return null;
     }
@@ -361,37 +427,31 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitUltrasonic2LEDAction(Ultrasonic2LEDAction<Void> ultrasonic2LEDAction) {
-        String led = ultrasonic2LEDAction.getLedNumber();
         int index = getSensorNumber(CyberpiConstants.ULTRASONIC2, ultrasonic2LEDAction.getUserDefinedPort());
-
         this.sb.append("mbuild.ultrasonic2.set_bri(");
         ultrasonic2LEDAction.getBrightness().accept(this);
         this.sb.append(", ");
-        if ( led.equals("ALL") ) {
-            this.sb.append("\"").append(led).append("\"");
-        } else {
-            this.sb.append(led);
-        }
+        appendLedNumber(ultrasonic2LEDAction.getLedNumber());
         this.sb.append(", ").append(index).append(")");
         return null;
     }
 
     private String getRGBString(String colour, int index, QuadRGBSensor<Void> quadRGBSensor) {
-        return "mbuild.quad_rgb_sensor.get_" + colour + "(\"" + quadRGBSensor.getSlot() + "\", " + index + ")";
+        return "mbuild.quad_rgb_sensor.get_" + colour + "(\"" + quadRGBSensor.slot + "\", " + index + ")";
     }
 
-    private ConfigurationComponentList getMbuildPort() {
+    private ConfigurationComponent getMbuildPort() {
         for ( Map.Entry<String, ConfigurationComponent> entry : configurationAst.getConfigurationComponents().entrySet() ) {
             ConfigurationComponent component = entry.getValue();
             if ( component.getComponentType().equals("MBUILD_PORT") ) {
-                return (ConfigurationComponentList) component;
+                return component;
             }
         }
         throw new DbcException("Mbuild-port is missing");
     }
 
     private List<ConfigurationComponent> getMbuildModules() {
-        ConfigurationComponentList mbuildPort = getMbuildPort();
+        ConfigurationComponent mbuildPort = getMbuildPort();
         return mbuildPort.getSubComponents().get(CyberpiConstants.MBUILDSENSOR);
     }
 
@@ -427,6 +487,16 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     }
 
     @Override
+    public Void visitSoundRecord(SoundRecord<Void> soundRecord) {
+        if ( soundRecord.mode.equals("start") ) {
+            this.sb.append("cyberpi.audio.record()");
+        } else {
+            this.sb.append("cyberpi.audio.stop_record()");
+        }
+        return null;
+    }
+
+    @Override
     public Void visitLightSensor(LightSensor<Void> lightSensor) {
         this.sb.append("cyberpi.get_bri()");
         return null;
@@ -434,9 +504,11 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitGyroSensor(GyroSensor<Void> gyroSensor) {
-        this.sb.append("cyberpi.get_rotation(\"").append(gyroSensor.getSlot().toLowerCase()).append("\")");
-
-        //todo gyro reset
+        if ( gyroSensor.getMode().equals(SC.RESET) ) {
+            this.sb.append("cyberpi.reset_rotation()");
+        } else {
+            this.sb.append("cyberpi.get_rotation(\"").append(gyroSensor.getSlot().toLowerCase()).append("\")");
+        }
         return null;
     }
 
@@ -620,11 +692,33 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitToneAction(ToneAction<Void> toneAction) {
+        this.sb.append("cyberpi.audio.play_tone(int(");
+        toneAction.getFrequency().accept(this);
+        this.sb.append("), ");
+        toneAction.getDuration().accept(this);
+        this.sb.append(" * 0.001)");
         return null;
     }
 
     @Override
     public Void visitPlayNoteAction(PlayNoteAction<Void> playNoteAction) {
+        this.sb.append("cyberpi.audio.play_tone(int(")
+            .append(playNoteAction.getFrequency())
+            .append("), ")
+            .append(playNoteAction.getDuration())
+            .append(" * 0.001)");
+        return null;
+    }
+
+    @Override
+    public Void visitVolumeAction(VolumeAction<Void> volumeAction) {
+        if ( volumeAction.getMode().name().equals("GET") ) {
+            this.sb.append("cyberpi.audio.get_vol()");
+        } else {
+            this.sb.append("cyberpi.audio.set_vol(");
+            volumeAction.getVolume().accept(this);
+            this.sb.append(")");
+        }
         return null;
     }
 
@@ -635,11 +729,17 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitTimerSensor(TimerSensor<Void> timerSensor) {
-        return null;
-    }
-
-    @Override
-    public Void visitVolumeAction(VolumeAction<Void> volumeAction) {
+        switch ( timerSensor.getMode() ) {
+            case SC.DEFAULT:
+            case SC.VALUE:
+                this.sb.append("( cyberpi.timer.get() - _timer").append(timerSensor.getUserDefinedPort()).append(" )");
+                break;
+            case SC.RESET:
+                this.sb.append("_timer").append(timerSensor.getUserDefinedPort()).append(" = cyberpi.timer.get()");
+                break;
+            default:
+                throw new DbcException("Invalid Time Mode!");
+        }
         return null;
     }
 
@@ -684,12 +784,5 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         this.sb.append(")");
         return null;
     }
-
-    private void appendHexColour(Expr<Void> color) {
-        this.sb.append("hex(int('%02x%02x%02x' % ");
-        color.accept(this);
-        this.sb.append(", 16))");
-    }
-
 
 }
