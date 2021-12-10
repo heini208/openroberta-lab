@@ -8,5 +8,6 @@ public class CyberpiConstants {
     public static final String ULTRASONIC2 = "MBUILD_ULTRASONIC2";
     public static final String DIFF_WHEEL_DIAMETER = "BRICK_WHEEL_DIAMETER";
     public static final String DIFF_TRACK_WIDTH = "BRICK_TRACK_WIDTH";
+    public static final String RECORD = "RECORD";
 
 }

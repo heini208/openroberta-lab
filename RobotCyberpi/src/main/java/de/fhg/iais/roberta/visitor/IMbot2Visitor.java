@@ -3,6 +3,7 @@ package de.fhg.iais.roberta.visitor;
 import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.light.LightStatusAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.PrintlnAction;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
@@ -62,6 +63,8 @@ public interface IMbot2Visitor<V> extends IActors4AutonomousDriveRobots<V>, ISen
     V visitLedsOffAction(LedsOffAction<V> ledsOffAction);
 
     V visitLedBrightnessAction(LedBrightnessAction<V> ledBrightnessAction);
+
+    V visitPrintlnAction(PrintlnAction<V> printlnAction);
 
     default V visitSerialWriteAction(SerialWriteAction<V> serialWriteAction) {
         return null;

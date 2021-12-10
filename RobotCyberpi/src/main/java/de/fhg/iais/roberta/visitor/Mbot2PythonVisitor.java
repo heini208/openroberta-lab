@@ -14,12 +14,13 @@ import de.fhg.iais.roberta.components.ConfigurationComponent;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.CyberpiConstants;
 import de.fhg.iais.roberta.inter.mode.action.IDriveDirection;
-import de.fhg.iais.roberta.inter.mode.action.ILanguage;
 import de.fhg.iais.roberta.syntax.MotionParam;
 import de.fhg.iais.roberta.syntax.MotorDuration;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
+import de.fhg.iais.roberta.syntax.action.mbot2.PrintlnAction;
+import de.fhg.iais.roberta.syntax.sensor.generic.GetSampleSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
@@ -45,7 +46,6 @@ import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.ConnectConst;
-import de.fhg.iais.roberta.syntax.lang.expr.EmptyExpr;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.NumConst;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
@@ -100,7 +100,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         nlIndent();
         this.sb.append("import math");
         nlIndent();
-        this.sb.append("import time"); //TODO maybe only if time is required
+        this.sb.append("import time");
         nlIndent();
         appendRobotVariables();
         nlIndent();
@@ -323,23 +323,15 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     }
 
     @Override
-    public Void visitShowTextAction(ShowTextAction<Void> showTextAction) {
-
-        if ( showTextAction.y instanceof EmptyExpr<?> && showTextAction.x instanceof EmptyExpr<?> ) {
-            appendPrintlnAction(showTextAction);
-        } else {
-            appendShowTextAction(showTextAction);
-        }
+    public Void visitPrintlnAction(PrintlnAction<Void> printlnAction) {
+        this.sb.append("cyberpi.console.println(");
+        printlnAction.msg.accept(this);
+        this.sb.append(")");
         return null;
     }
 
-    private void appendPrintlnAction(ShowTextAction<Void> showTextAction) {
-        this.sb.append("cyberpi.console.println(");
-        showTextAction.msg.accept(this);
-        this.sb.append(")");
-    }
-
-    private void appendShowTextAction(ShowTextAction<Void> showTextAction) {
+    @Override
+    public Void visitShowTextAction(ShowTextAction<Void> showTextAction) {
         this.sb.append("cyberpi.display.show_label(");
         showTextAction.msg.accept(this);
         this.sb.append(", 16, ");
@@ -349,6 +341,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         this.sb.append("int(17 * ");
         showTextAction.y.accept(this);
         this.sb.append("))");
+        return null;
     }
 
     @Override
@@ -415,9 +408,6 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         this.sb.append("(");
         quadRGBLightOnAction.getColor().accept(this);
         this.sb.append(")");
-        //Todo does not work hex colour is not suported even though its stated by api only specific colour names
-        //appendHexColour(quadRGBLightOnAction.getColor());
-        //possible workaround using def: hex to str
         this.sb.append(", ").append(index).append(")");
         return null;
     }
@@ -685,7 +675,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
             if ( diffDrive != null ) {
                 rightMotorPort = diffDrive.getOptProperty("MOTOR_R");
             } else {
-                rightMotorPort = "EM2"; //default if something in validation went wrong this should never happen
+                rightMotorPort = "EM2";
             }
         }
     }
@@ -789,4 +779,8 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         return null;
     }
 
+    @Override
+    public Void visitGetSampleSensor(GetSampleSensor<Void> sensorGetSample) {
+        return sensorGetSample.getSensor().accept(this);
+    }
 }

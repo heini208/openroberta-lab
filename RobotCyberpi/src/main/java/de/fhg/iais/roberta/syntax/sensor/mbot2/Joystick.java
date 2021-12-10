@@ -18,9 +18,9 @@ import de.fhg.iais.roberta.util.dbc.Assert;
  * <br/>
  */
 
-@NepoPhrase(containerType = "JOYSTICK_GETSAMPLE")
+@NepoPhrase(containerType = "JOYSTICK_SENSING")
 public class Joystick<V> extends Sensor<V> implements WithUserDefinedPort<V> {
-    @NepoField(name = BlocklyConstants.ACTORPORT, value = BlocklyConstants.EMPTY_PORT)
+    @NepoField(name = BlocklyConstants.SENSORPORT, value = BlocklyConstants.EMPTY_PORT)
     public final String port;
     @NepoField(name = BlocklyConstants.SLOT, value = BlocklyConstants.EMPTY_SLOT)
     public final String slot;
