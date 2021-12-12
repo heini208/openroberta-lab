@@ -16,13 +16,9 @@ import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.CyberpiConstants;
 import de.fhg.iais.roberta.syntax.BlocklyConstants;
-import de.fhg.iais.roberta.syntax.MotionParam;
-import de.fhg.iais.roberta.syntax.MotorDuration;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.SC;
 import de.fhg.iais.roberta.syntax.WithUserDefinedPort;
-import de.fhg.iais.roberta.syntax.action.Action;
-import de.fhg.iais.roberta.syntax.action.MoveAction;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
@@ -35,20 +31,14 @@ import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.QuadRGBLightOnAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.Ultrasonic2LEDAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorGetPowerAction;
-import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorSetPowerAction;
-import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.CurveAction;
-import de.fhg.iais.roberta.syntax.action.motor.differential.MotorDriveStopAction;
-import de.fhg.iais.roberta.syntax.action.motor.differential.TurnAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
-import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.NumConst;
-import de.fhg.iais.roberta.syntax.sensor.Sensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.EncoderSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
@@ -61,11 +51,11 @@ import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.QuadRGBSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord;
 import de.fhg.iais.roberta.util.dbc.Assert;
-import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisitor;
 import de.fhg.iais.roberta.syntax.action.motor.differential.DriveAction;
+import de.fhg.iais.roberta.visitor.validate.DifferentialMotorValidatorAndCollectorVisitor;
 
 
-public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCollectorVisitor implements IMbot2Visitor<Void> {
+public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidatorAndCollectorVisitor implements IMbot2Visitor<Void> {
 
     private static final List<String> NON_BLOCKING_PROPERTIES = Collections.unmodifiableList(Arrays.asList("MOTOR_L", "MOTOR_R", "BRICK_WHEEL_DIAMETER", "BRICK_TRACK_WIDTH"));
 
@@ -97,7 +87,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
                 continue;
             }
             if ( takenPins.contains(property.getValue()) ) {
-                addErrorToPhrase(mainTask, "CONFIGURATION_ERROR_OVERLAPPING_PORTS");
+                addErrorToPhrase(mainTask, "");
                 break;
             }
             takenPins.add(property.getValue());
@@ -309,159 +299,22 @@ public class Mbot2ValidatorAndCollectorVisitor extends CommonNepoValidatorAndCol
         return null;
     }
 
-
-    @Override
-    public Void visitTurnAction(TurnAction<Void> turnAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitMotorDriveStopAction(MotorDriveStopAction<Void> stopAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitMotorOnAction(MotorOnAction<Void> motorOnAction) {
-        requiredComponentVisited(motorOnAction, motorOnAction.getParam().getSpeed());
-        MotorDuration<Void> duration = motorOnAction.getParam().getDuration();
-        if ( duration != null ) {
-            checkForZeroSpeed(motorOnAction, motorOnAction.getParam().getSpeed());
-            requiredComponentVisited(motorOnAction, duration.getValue());
-        }
-        checkMotorPortAndAddUsedActor(motorOnAction);
-        return null;
-    }
-
-    @Override
-    public Void visitMotorStopAction(MotorStopAction<Void> motorStopAction) {
-        checkMotorPortAndAddUsedActor(motorStopAction);
-        return null;
-    }
-
     @Override
     public Void visitDriveAction(DriveAction<Void> driveAction) {
+        super.visitDriveAction(driveAction);
         if ( driveAction.getParam().getDuration() != null ) {
             usedMethodBuilder.addUsedMethod(Mbot2Methods.DIFFDRIVEFOR);
         }
-        checkDifferentialDriveBlock(driveAction);
-        checkAndVisitMotionParam(driveAction, driveAction.getParam());
         return null;
     }
 
     @Override
     public Void visitCurveAction(CurveAction<Void> curveAction) {
+        super.visitCurveAction(curveAction);
         if ( curveAction.getParamLeft().getDuration() != null ) {
             usedMethodBuilder.addUsedMethod(Mbot2Methods.DIFFDRIVEFOR);
         }
-        checkDifferentialDriveBlock(curveAction);
-        checkAndVisitMotionParam(curveAction, curveAction.getParamLeft());
-        checkAndVisitMotionParam(curveAction, curveAction.getParamRight());
         return null;
-    }
-
-    private void checkDifferentialDriveBlock(Action<Void> motionAction) {
-        if ( hasDifferentialDriveCheck(motionAction) ) {
-            hasEncodersOnDifferentialDriveCheck(motionAction);
-            addDifferentialDriveToUsedHardware();
-        }
-    }
-
-    private boolean hasDifferentialDriveCheck(Action<Void> motionAction) {
-        ConfigurationComponent differentialDrive = getDifferentialDrive();
-        if ( differentialDrive == null ) {
-            addErrorToPhrase(motionAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
-            return false;
-        } else if ( differentialDrive.getOptProperty("MOTOR_L").equals(differentialDrive.getOptProperty("MOTOR_R")) ) {
-            addErrorToPhrase(motionAction, "CONFIGURATION_ERROR_OVERLAPPING_PORTS");
-            return false;
-        }
-        return true;
-    }
-
-    private ConfigurationComponent getDifferentialDrive() {
-        Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
-        for ( ConfigurationComponent component : configComponents.values() ) {
-            if ( component.getComponentType().equals(CyberpiConstants.DIFFERENTIALDRIVE) ) {
-                return component;
-            }
-        }
-        return null;
-    }
-
-    private void hasEncodersOnDifferentialDriveCheck(Action<Void> motionParam) {
-        ConfigurationComponent differentialDrive = getDifferentialDrive();
-        Assert.notNull(differentialDrive, "differentialDrive block is missing in the configuration");
-        List<ConfigurationComponent> rightMotors = getEncodersOnPort(differentialDrive.getOptProperty("MOTOR_R"));
-        List<ConfigurationComponent> leftMotors = getEncodersOnPort(differentialDrive.getOptProperty("MOTOR_L"));
-
-        if ( rightMotors.size() > 1 ) {
-            addErrorToPhrase(motionParam, "CONFIGURATION_ERROR_MULTIPLE_RIGHT_MOTORS");
-        } else if ( leftMotors.size() > 1 ) {
-            addErrorToPhrase(motionParam, "CONFIGURATION_ERROR_MULTIPLE_LEFT_MOTORS");
-        } else if ( rightMotors.isEmpty() ) {
-            addErrorToPhrase(motionParam, "CONFIGURATION_ERROR_MOTOR_RIGHT_MISSING");
-        } else if ( leftMotors.isEmpty() ) {
-            addErrorToPhrase(motionParam, "CONFIGURATION_ERROR_MOTOR_LEFT_MISSING");
-        }
-    }
-
-    private void addDifferentialDriveToUsedHardware() {
-        ConfigurationComponent diffDrive = getDifferentialDrive();
-        Assert.notNull(diffDrive, "differential missing in Configuration");
-
-        usedHardwareBuilder.addUsedActor(new UsedActor(diffDrive.getUserDefinedPortName(), CyberpiConstants.DIFFERENTIALDRIVE));
-        List<ConfigurationComponent> motorsR = getEncodersOnPort(diffDrive.getOptProperty("MOTOR_R"));
-        List<ConfigurationComponent> motorsL = getEncodersOnPort(diffDrive.getOptProperty("MOTOR_L"));
-        if ( !motorsL.isEmpty() ) {
-            usedHardwareBuilder.addUsedActor(new UsedActor(motorsL.get(0).getUserDefinedPortName(), motorsL.get(0).getComponentType()));
-        }
-        if ( !motorsR.isEmpty() ) {
-            usedHardwareBuilder.addUsedActor(new UsedActor(motorsR.get(0).getUserDefinedPortName(), motorsR.get(0).getComponentType()));
-        }
-    }
-
-    private List<ConfigurationComponent> getEncodersOnPort(String port) {
-        Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
-        List<ConfigurationComponent> encoders = new ArrayList<>();
-        for ( ConfigurationComponent component : configComponents.values() ) {
-            if ( component.getComponentType().equals(SC.ENCODER) || component.getComponentType().equals("MOTOR") || component.getComponentType().equals(SC.STEPMOTOR) ) {
-                if ( component.getComponentProperties().containsValue(port) ) {
-                    encoders.add(component);
-                }
-            }
-        }
-        return encoders;
-    }
-
-    private void checkAndVisitMotionParam(Action<Void> action, MotionParam<Void> param) {
-        MotorDuration<Void> duration = param.getDuration();
-        Expr<Void> speed = param.getSpeed();
-
-        requiredComponentVisited(action, speed);
-
-        if ( duration != null ) {
-            requiredComponentVisited(action, duration.getValue());
-            checkForZeroSpeed(action, speed);
-        }
-    }
-
-
-    private void checkForZeroSpeed(Action<Void> action, Expr<Void> speed) {
-        if ( speed.getKind().hasName("NUM_CONST") ) {
-            if ( Math.abs(Double.parseDouble(((NumConst<Void>) speed).getValue())) < 1E-7 ) {
-                addWarningToPhrase(action, "MOTOR_SPEED_0");
-            }
-        }
-    }
-
-    private void checkMotorPortAndAddUsedActor(MoveAction<Void> moveAction) {
-        ConfigurationComponent actor = this.robotConfiguration.optConfigurationComponent(moveAction.getUserDefinedPort());
-        if ( actor == null ) {
-            addErrorToPhrase(moveAction, "CONFIGURATION_ERROR_MOTOR_MISSING");
-            return;
-        }
-
-        usedHardwareBuilder.addUsedActor(new UsedActor(moveAction.getUserDefinedPort(), actor.getComponentType()));
     }
 
     private void checkSensorPort(WithUserDefinedPort<Void> sensor) {

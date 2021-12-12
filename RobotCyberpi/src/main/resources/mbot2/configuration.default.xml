@@ -27,7 +27,7 @@
             </instance>
             <instance x="200" y="200">
                 <block type="robConf_lcd" intask="true" id= "5" deletable="false">
-                    <field name="NAME">_L</field>
+                    <field name="NAME">_LCD</field>
                 </block>
             </instance>
             <instance x="290" y="200">
