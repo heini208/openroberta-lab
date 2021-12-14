@@ -2,11 +2,15 @@ package de.fhg.iais.roberta.syntax.sensor.mbot2;
 
 import de.fhg.iais.roberta.blockly.generated.Hide;
 import de.fhg.iais.roberta.syntax.BlockType;
+import de.fhg.iais.roberta.syntax.BlockTypeContainer;
 import de.fhg.iais.roberta.syntax.BlocklyBlockProperties;
 import de.fhg.iais.roberta.syntax.BlocklyComment;
 import de.fhg.iais.roberta.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.syntax.WithUserDefinedPort;
+import de.fhg.iais.roberta.syntax.action.mbot2.DisplaySetColourAction;
+import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.sensor.Sensor;
+import de.fhg.iais.roberta.syntax.sensor.SensorMetaDataBean;
 import de.fhg.iais.roberta.transformer.NepoField;
 import de.fhg.iais.roberta.transformer.NepoHide;
 import de.fhg.iais.roberta.transformer.NepoPhrase;
@@ -34,6 +38,17 @@ public class Joystick<V> extends Sensor<V> implements WithUserDefinedPort<V> {
         this.slot = slot;
         this.hide = hide;
         setReadOnly();
+    }
+
+    /**
+     * Creates instance of {@link Joystick}. This instance is read only and can not be modified.
+     *
+     * @param properties of the block (see {@link BlocklyBlockProperties}),
+     * @param comment added from the user,
+     * @return read only object of class {@link DisplaySetColourAction}
+     */
+    public static <V> Joystick<V> make(SensorMetaDataBean sensorMetaDataBean, BlocklyBlockProperties properties, BlocklyComment comment) {
+        return new Joystick<>(BlockTypeContainer.getByName("JOYSTICK_SENSING"), properties, comment, sensorMetaDataBean.getPort(),sensorMetaDataBean.getSlot(), null);
     }
 
     @Override

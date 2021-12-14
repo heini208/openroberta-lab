@@ -9,6 +9,7 @@ import de.fhg.iais.roberta.syntax.BlocklyComment;
 import de.fhg.iais.roberta.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.WithUserDefinedPort;
+import de.fhg.iais.roberta.syntax.action.mbot2.DisplaySetColourAction;
 import de.fhg.iais.roberta.syntax.sensor.ExternalSensor;
 import de.fhg.iais.roberta.syntax.sensor.Sensor;
 import de.fhg.iais.roberta.syntax.sensor.SensorMetaDataBean;
@@ -36,6 +37,17 @@ public class QuadRGBSensor<V> extends Sensor<V> implements WithUserDefinedPort<V
         this.sensorPort = sensorPort;
         this.slot = slot;
         setReadOnly();
+    }
+
+    /**
+     * Creates instance of {@link QuadRGBSensor}. This instance is read only and can not be modified.
+     *
+     * @param properties of the block (see {@link BlocklyBlockProperties}),
+     * @param comment added from the user,
+     * @return read only object of class {@link DisplaySetColourAction}
+     */
+    public static <V> QuadRGBSensor<V> make(SensorMetaDataBean sensorMetaDataBean, BlocklyBlockProperties properties, BlocklyComment comment) {
+        return new QuadRGBSensor<>(BlockTypeContainer.getByName("QUAD_COLOR_SENSING"), properties, comment,sensorMetaDataBean.getMutation(), sensorMetaDataBean.getMode(), sensorMetaDataBean.getPort(),sensorMetaDataBean.getSlot());
     }
 
     @Override
