@@ -96,6 +96,10 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitClearDisplayAction(ClearDisplayAction<Void> clearDisplayAction) {
+        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(clearDisplayAction.port);
+        if ( usedConfigurationBlock == null ) {
+            addErrorToPhrase(clearDisplayAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
+        }
         usedHardwareBuilder.addUsedActor(new UsedActor("", SC.DISPLAY));
         return null;
     }
@@ -141,6 +145,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitPlayRecordingAction(PlayRecordingAction<Void> playRecordingAction) {
+        checkActorPort(playRecordingAction);
         usedHardwareBuilder.addUsedActor(new UsedActor(playRecordingAction.getUserDefinedPort(), CyberpiConstants.RECORD));
         return null;
     }
@@ -168,6 +173,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitDisplaySetColourAction(DisplaySetColourAction<Void> displaySetColourAction) {
+        checkActorPort(displaySetColourAction);
         usedHardwareBuilder.addUsedActor(new UsedActor(displaySetColourAction.getUserDefinedPort(), SC.DISPLAY));
         requiredComponentVisited(displaySetColourAction, displaySetColourAction.getColor());
         return null;
@@ -213,6 +219,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitLedOnActionWithIndex(LedOnActionWithIndex<Void> ledOnActionWithIndex) {
+        checkActorPort(ledOnActionWithIndex);
         requiredComponentVisited(ledOnActionWithIndex, ledOnActionWithIndex.getColor());
         usedHardwareBuilder.addUsedActor(new UsedActor(ledOnActionWithIndex.getUserDefinedPort(), SC.RGBLED));
         return null;
@@ -220,12 +227,14 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitLedsOffAction(LedsOffAction<Void> ledsOffAction) {
+        checkActorPort(ledsOffAction);
         usedHardwareBuilder.addUsedActor(new UsedActor(ledsOffAction.getUserDefinedPort(), SC.RGBLED));
         return null;
     }
 
     @Override
     public Void visitLedBrightnessAction(LedBrightnessAction<Void> ledBrightnessAction) {
+        checkActorPort(ledBrightnessAction);
         requiredComponentVisited(ledBrightnessAction, ledBrightnessAction.getBrightness());
         usedHardwareBuilder.addUsedActor(new UsedActor(ledBrightnessAction.getUserDefinedPort(), SC.RGBLED));
         return null;
@@ -233,6 +242,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitPrintlnAction(PrintlnAction<Void> printlnAction) {
+        checkActorPort(printlnAction);
         requiredComponentVisited(printlnAction, printlnAction.msg);
         usedHardwareBuilder.addUsedActor(new UsedActor(printlnAction.getUserDefinedPort(), SC.DISPLAY));
         return null;
@@ -240,6 +250,10 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitShowTextAction(ShowTextAction<Void> showTextAction) {
+        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(showTextAction.port);
+        if ( usedConfigurationBlock == null ) {
+            addErrorToPhrase(showTextAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
+        }
         requiredComponentVisited(showTextAction, showTextAction.msg);
         requiredComponentVisited(showTextAction, showTextAction.x);
         requiredComponentVisited(showTextAction, showTextAction.y);
@@ -249,6 +263,10 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitToneAction(ToneAction<Void> toneAction) {
+        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(toneAction.port);
+        if ( usedConfigurationBlock == null ) {
+            addErrorToPhrase(toneAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
+        }
         requiredComponentVisited(toneAction, toneAction.getDuration(), toneAction.getFrequency());
         usedHardwareBuilder.addUsedActor(new UsedActor("", SC.MUSIC));
         if ( toneAction.getDuration().getKind().hasName("NUM_CONST") ) {
@@ -262,6 +280,10 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
 
     @Override
     public Void visitPlayNoteAction(PlayNoteAction<Void> playNoteAction) {
+        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(playNoteAction.port);
+        if ( usedConfigurationBlock == null ) {
+            addErrorToPhrase(playNoteAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
+        }
         usedHardwareBuilder.addUsedActor(new UsedActor("", SC.MUSIC));
         return null;
     }
@@ -315,6 +337,15 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
             usedMethodBuilder.addUsedMethod(Mbot2Methods.DIFFDRIVEFOR);
         }
         return null;
+    }
+
+    private void checkActorPort(WithUserDefinedPort<Void> action) {
+        Assert.isTrue(action instanceof Phrase, "checking Port of a non Phrase");
+        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(action.getUserDefinedPort());
+        if ( usedConfigurationBlock == null ) {
+            Phrase<Void> actionAsPhrase = (Phrase<Void>) action;
+            addErrorToPhrase(actionAsPhrase, "CONFIGURATION_ERROR_ACTOR_MISSING");
+        }
     }
 
     private void checkSensorPort(WithUserDefinedPort<Void> sensor) {
