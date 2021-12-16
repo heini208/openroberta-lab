@@ -4,6 +4,7 @@ import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.light.LightStatusAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.PrintlnAction;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.GyroResetAxis;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
@@ -43,6 +44,8 @@ public interface IMbot2Visitor<V> extends IActors4AutonomousDriveRobots<V>, ISen
     V visitLightSensor(LightSensor<V> lightSensor);
 
     V visitGyroSensor(GyroSensor<V> gyroSensor);
+
+    V visitGyroResetAxis(GyroResetAxis<V> gyroResetAxis);
 
     V visitAccelerometerSensor(AccelerometerSensor<V> accelerometerSensor);
 

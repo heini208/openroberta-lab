@@ -21,6 +21,7 @@ import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.PrintlnAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.GetSampleSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.GyroResetAxis;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedBrightnessAction;
 import de.fhg.iais.roberta.syntax.action.mbot2.LedOnActionWithIndex;
@@ -498,11 +499,15 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitGyroSensor(GyroSensor<Void> gyroSensor) {
-        if ( gyroSensor.getMode().equals(SC.RESET) ) {
-            this.sb.append("cyberpi.reset_rotation()");
-        } else {
-            this.sb.append("cyberpi.get_rotation(\"").append(gyroSensor.getSlot().toLowerCase()).append("\")");
-        }
+        this.sb.append("cyberpi.get_rotation(\"").append(gyroSensor.getSlot().toLowerCase()).append("\")");
+        return null;
+    }
+
+    @Override
+    public Void visitGyroResetAxis(GyroResetAxis<Void> gyroResetAxis) {
+        this.sb.append("cyberpi.reset_rotation(\"")
+            .append(gyroResetAxis.slot.toLowerCase())
+            .append("\")");
         return null;
     }
 

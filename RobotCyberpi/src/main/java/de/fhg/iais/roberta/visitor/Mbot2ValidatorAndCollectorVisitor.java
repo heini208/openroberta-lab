@@ -47,6 +47,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbot2.GyroResetAxis;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.Joystick;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.QuadRGBSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord;
@@ -62,6 +63,7 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
     private static final Map<String, String> SENSOR_COMPONENT_TYPE_MAP = new HashMap<String, String>() {{
         put("SOUND_RECORD", SC.SOUND);
         put("QUAD_COLOR_SENSING", CyberpiConstants.QUADRGB);
+        put("GYRO_AXIS_RESET", SC.GYRO);
     }};
 
     public Mbot2ValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder<?>> beanBuilders) {
@@ -161,6 +163,13 @@ public class Mbot2ValidatorAndCollectorVisitor extends DifferentialMotorValidato
     public Void visitGyroSensor(GyroSensor<Void> gyroSensor) {
         checkSensorPort(gyroSensor);
         usedHardwareBuilder.addUsedSensor(new UsedSensor(gyroSensor.getUserDefinedPort(), SC.GYRO, gyroSensor.getMode()));
+        return null;
+    }
+
+    @Override
+    public Void visitGyroResetAxis(GyroResetAxis<Void> gyroResetAxis) {
+        checkSensorPort(gyroResetAxis);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(gyroResetAxis.getUserDefinedPort(), SC.GYRO, gyroResetAxis.slot));
         return null;
     }
 

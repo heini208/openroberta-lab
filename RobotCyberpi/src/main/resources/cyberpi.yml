@@ -60,6 +60,11 @@ block:
     implementor: de.fhg.iais.roberta.syntax.sensor.mbot2.SoundRecord
     type: [ robSensors_sound_record ]
 
+  GYRO_RESET_AXIS:
+    category: SENSOR
+    implementor: de.fhg.iais.roberta.syntax.sensor.mbot2.GyroResetAxis
+    type: [ robSensors_gyro_reset_axis ]
+
 configuration:
   MBUILD_PORT: [ robConf_mbuild_port ]
   MBUILD_ULTRASONIC2: [ robBrick_mbuild_ultrasonic2 ]
