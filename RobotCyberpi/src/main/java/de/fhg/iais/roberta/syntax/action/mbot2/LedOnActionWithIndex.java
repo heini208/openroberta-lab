@@ -39,25 +39,6 @@ public class LedOnActionWithIndex<V> extends Action<V> implements WithUserDefine
         setReadOnly();
     }
 
-    /**
-     * Creates instance of {@link LedOnActionWithIndex}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link LedOnActionWithIndex}
-     */
-    public static <V> LedOnActionWithIndex<V> make(BlocklyBlockProperties properties, BlocklyComment comment, Expr<V> color, String port, String led, Hide hide) {
-        return new LedOnActionWithIndex<>(BlockTypeContainer.getByName("CYBERPI_LED_ON_ACTION"), properties, comment, color, port, led, hide);
-    }
-
-    public Expr<V> getColor() {
-        return this.color;
-    }
-
-    public String getLed(){
-        return this.led;
-    }
-
     @Override
     public String getUserDefinedPort() {
         return this.port;

@@ -43,18 +43,7 @@ public class Ultrasonic2LEDAction<V> extends Action<V> implements WithUserDefine
         this.led = led;
         setReadOnly();
     }
-
-    /**
-     * Creates instance of {@link Ultrasonic2LEDAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link Ultrasonic2LEDAction}
-     */
-    public static <V> Ultrasonic2LEDAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port, String led, Expr<V> brightness) {
-        return new Ultrasonic2LEDAction<>(BlockTypeContainer.getByName("ULTRASONIC2_LIGHT_ACTION"), properties, comment, port, led, brightness);
-    }
-
+    
     public Expr<V> getBrightness() {
         return this.brightness;
     }

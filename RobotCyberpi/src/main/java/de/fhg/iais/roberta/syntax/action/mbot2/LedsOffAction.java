@@ -31,19 +31,7 @@ public class LedsOffAction<V> extends Action<V> implements WithUserDefinedPort<V
         this.led = led;
         setReadOnly();
     }
-
-    /**
-     * Creates instance of {@link LedsOffAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link LedsOffAction}
-     */
-    public static <V> LedsOffAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port, String led, Hide hide) {
-        return new LedsOffAction<>(BlockTypeContainer.getByName("LEDS_OFF_ACTION"), properties, comment, port,led, hide);
-    }
-
-
+    
     public String getLed(){
         return this.led;
     }

@@ -32,18 +32,7 @@ public class PlayRecordingAction<V> extends Action<V> implements WithUserDefined
         this.port = port;
         setReadOnly();
     }
-
-    /**
-     * Creates instance of {@link PlayRecordingAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link PlayRecordingAction}
-     */
-    public static <V> PlayRecordingAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port, Hide hide) {
-        return new PlayRecordingAction<>(BlockTypeContainer.getByName("DISPLAY_SET_COLOUR_ACTION"), properties, comment, port, hide);
-    }
-
+    
     @Override
     public String getUserDefinedPort() {
         return this.port;

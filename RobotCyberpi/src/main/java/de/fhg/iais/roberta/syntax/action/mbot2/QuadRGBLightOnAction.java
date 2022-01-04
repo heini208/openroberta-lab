@@ -39,18 +39,7 @@ public class QuadRGBLightOnAction<V> extends Action<V> implements WithUserDefine
         this.port = port;
         setReadOnly();
     }
-
-    /**
-     * Creates instance of {@link QuadRGBLightOnAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link QuadRGBLightOnAction}
-     */
-    public static <V> QuadRGBLightOnAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, Expr<V> color, String port) {
-        return new QuadRGBLightOnAction<>(BlockTypeContainer.getByName("QUADRGB_LIGHT_ACTION"), properties, comment, color, port);
-    }
-
+    
     public Expr<V> getColor() {
         return this.color;
     }

@@ -49,18 +49,6 @@ public class DisplaySetColourAction<V> extends Action<V> implements WithUserDefi
         this.port = port;
         setReadOnly();
     }
-
-    /**
-     * Creates instance of {@link DisplaySetColourAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link DisplaySetColourAction}
-     */
-    public static <V> DisplaySetColourAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, Expr<V> color, String port, Hide hide) {
-        return new DisplaySetColourAction<>(BlockTypeContainer.getByName("DISPLAY_SET_COLOUR_ACTION"), properties, comment, color, port, hide);
-    }
-
     public Expr<V> getColor() {
         return this.color;
     }

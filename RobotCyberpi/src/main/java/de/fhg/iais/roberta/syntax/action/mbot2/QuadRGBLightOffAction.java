@@ -36,17 +36,6 @@ public class QuadRGBLightOffAction<V> extends Action<V> implements WithUserDefin
         setReadOnly();
     }
 
-    /**
-     * Creates instance of {@link QuadRGBLightOffAction}. This instance is read only and can not be modified.
-     *
-     * @param properties of the block (see {@link BlocklyBlockProperties}),
-     * @param comment added from the user,
-     * @return read only object of class {@link QuadRGBLightOffAction}
-     */
-    public static <V> QuadRGBLightOffAction<V> make(BlocklyBlockProperties properties, BlocklyComment comment, String port) {
-        return new QuadRGBLightOffAction<>(BlockTypeContainer.getByName("QUADRGB_LIGHT_OFF_ACTION"), properties, comment, port);
-    }
-
     @Override
     public String getUserDefinedPort() {
         return this.port;

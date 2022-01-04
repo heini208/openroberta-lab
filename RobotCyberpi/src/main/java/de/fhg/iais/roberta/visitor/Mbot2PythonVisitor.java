@@ -48,7 +48,6 @@ import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.ConnectConst;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
-import de.fhg.iais.roberta.syntax.lang.expr.NumConst;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.stmt.StmtList;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitStmt;
@@ -97,16 +96,22 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         if ( !withWrapping ) {
             return;
         }
-        this.sb.append("import cyberpi, mbot2, mbuild");
-        nlIndent();
-        this.sb.append("import math");
+        this.sb.append("import cyberpi");
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.ENCODER) ) {
+            this.sb.append(", mbot2");
+        }
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(CyberpiConstants.MBUILDSENSOR) ) {
+            this.sb.append(", mbuild");
+        }
         nlIndent();
         this.sb.append("import time");
         nlIndent();
-        appendRobotVariables();
+        this.sb.append("import math");
         nlIndent();
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE) ) {
+            appendRobotVariables();
+        }
         generateTimerVariables();
-        nlIndent();
         addColors();
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
@@ -121,6 +126,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     private void appendRobotVariables() {
         ConfigurationComponent diffDrive = getDiffDrive();
         if ( diffDrive != null ) {
+            nlIndent();
             double circumference = Double.parseDouble(diffDrive.getComponentProperties().get(CyberpiConstants.DIFF_WHEEL_DIAMETER)) * Math.PI;
             double trackWidth = Double.parseDouble(diffDrive.getComponentProperties().get(CyberpiConstants.DIFF_TRACK_WIDTH));
             this.sb.append("_trackWidth = ");
@@ -131,6 +137,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
             nlIndent();
             this.sb.append("_diffPortsSwapped = ");
             this.sb.append(this.rightMotorPort.equals("EM1") ? "True" : "False");
+            nlIndent();
         }
     }
 
@@ -152,12 +159,8 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     private void addColors() {
         int colorBlocks = (int) this.getBean(UsedHardwareBean.class).getUsedSensors()
             .stream()
-            .filter(usedSensor -> usedSensor.getType().equals(CyberpiConstants.QUADRGBSENSOR)
-                && usedSensor.getMode().equals(SC.COLOUR))
-            .count();
-        colorBlocks += this.getBean(UsedHardwareBean.class).getUsedActors()
-            .stream()
-            .filter(usedSensor -> usedSensor.getType().equals(CyberpiConstants.QUADRGBSENSOR))
+            .filter(usedSensor -> usedSensor.getType().equals(CyberpiConstants.QUADRGB)
+                && usedSensor.getMode().equals(SC.COLOUR) || usedSensor.getMode().equals(SC.LED))
             .count();
 
         if ( colorBlocks != 0 ) {
@@ -215,10 +218,12 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         nlIndent();
         this.sb.append("raise");
         decrIndentation();
-        nlIndent();
-        this.sb.append("mbot2.motor_stop(\"all\")");
-        nlIndent();
-        this.sb.append("mbot2.EM_stop(\"all\")");
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.ENCODER) ) {
+            nlIndent();
+            this.sb.append("mbot2.motor_stop(\"all\")");
+            nlIndent();
+            this.sb.append("mbot2.EM_stop(\"all\")");
+        }
         decrIndentation();
         nlIndent();
 
@@ -271,7 +276,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         this.sb.append("cyberpi.led.on(");
         appendRGBAsArguments(ledOnActionWithIndex.color);
         this.sb.append(", ");
-        appendLedNumber(ledOnActionWithIndex.getLed());
+        appendLedNumber(ledOnActionWithIndex.led);
         this.sb.append(")");
         return null;
     }
@@ -287,7 +292,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     @Override
     public Void visitLedBrightnessAction(LedBrightnessAction<Void> ledBrightnessAction) {
         this.sb.append("cyberpi.led.set_bri(");
-        ledBrightnessAction.getBrightness().accept(this);
+        ledBrightnessAction.brightness.accept(this);
         this.sb.append(")");
         return null;
     }
@@ -377,7 +382,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitQuadRGBSensor(QuadRGBSensor<Void> quadRGBSensor) {
-        int index = getSensorNumber(CyberpiConstants.QUADRGB, quadRGBSensor.getUserDefinedPort());
+        int index = getSensorNumber(CyberpiConstants.MBUILD_QUADRGB, quadRGBSensor.getUserDefinedPort());
         String mode = quadRGBSensor.mode;
         switch ( mode ) {
             case "LINE":
@@ -403,7 +408,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitQuadRGBLightOnAction(QuadRGBLightOnAction<Void> quadRGBLightOnAction) {
-        int index = getSensorNumber(CyberpiConstants.QUADRGB, quadRGBLightOnAction.getUserDefinedPort());
+        int index = getSensorNumber(CyberpiConstants.MBUILD_QUADRGB, quadRGBLightOnAction.getUserDefinedPort());
         this.sb.append("mbuild.quad_rgb_sensor.set_led(");
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(Mbot2Methods.RGBASSTRING));
         this.sb.append("(");
@@ -415,7 +420,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitQuadRGBLightOffAction(QuadRGBLightOffAction<Void> quadRGBLightOffAction) {
-        int index = getSensorNumber(CyberpiConstants.QUADRGB, quadRGBLightOffAction.getUserDefinedPort());
+        int index = getSensorNumber(CyberpiConstants.MBUILD_QUADRGB, quadRGBLightOffAction.getUserDefinedPort());
         this.sb.append("mbuild.quad_rgb_sensor.off_led(").append(index).append(")");
         return null;
     }
@@ -759,9 +764,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     @Override
     public Void visitWaitTimeStmt(WaitTimeStmt<Void> waitTimeStmt) {
         this.sb.append("time.sleep(");
-        float time = Float.parseFloat(((NumConst<Void>) waitTimeStmt.getTime()).getValue()) / 100;
-        this.sb.append(time);
-
+        waitTimeStmt.getTime().accept(this);
         this.sb.append(")");
         return null;
     }
