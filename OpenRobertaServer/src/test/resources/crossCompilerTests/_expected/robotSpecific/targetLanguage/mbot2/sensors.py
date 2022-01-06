@@ -132,6 +132,7 @@ def main():
         run()
     except Exception as e:
         raise
-    mbot2.motor_stop("all")
-    mbot2.EM_stop("all")
+    finally:
+        mbot2.motor_stop("all")
+        mbot2.EM_stop("all")
 main()

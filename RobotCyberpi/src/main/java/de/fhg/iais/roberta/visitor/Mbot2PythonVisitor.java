@@ -220,9 +220,13 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
         decrIndentation();
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.ENCODER) ) {
             nlIndent();
+            this.sb.append("finally:");
+            incrIndentation();
+            nlIndent();
             this.sb.append("mbot2.motor_stop(\"all\")");
             nlIndent();
             this.sb.append("mbot2.EM_stop(\"all\")");
+            decrIndentation();
         }
         decrIndentation();
         nlIndent();
@@ -765,7 +769,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     public Void visitWaitTimeStmt(WaitTimeStmt<Void> waitTimeStmt) {
         this.sb.append("time.sleep(");
         waitTimeStmt.getTime().accept(this);
-        this.sb.append(")");
+        this.sb.append("/100)");
         return null;
     }
 

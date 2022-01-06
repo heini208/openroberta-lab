@@ -38,7 +38,7 @@ def control():
     while True:
         if ___booleanVarFalse:
             break
-    time.sleep(___numberVar)
+    time.sleep(___numberVar/100)
 
 def logic():
     global ___booleanVarFalse, ___booleanVar, ___numberList, ___booleanList, ___stringList, ___colorList, ___numberVar, ___stringVar
