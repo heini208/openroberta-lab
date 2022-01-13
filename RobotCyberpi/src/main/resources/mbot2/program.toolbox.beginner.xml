@@ -68,20 +68,10 @@
                 </block>
             </value>
         </block>
-        <block type="robActions_display_text">
+        <block type="robActions_println">
             <value name="OUT">
                 <block type="text">
                     <field name="TEXT">Hallo</field>
-                </block>
-            </value>
-            <value name="COL">
-                <block type="math_number">
-                    <field name="NUM">0</field>
-                </block>
-            </value>
-            <value name="ROW">
-                <block type="math_number">
-                    <field name="NUM">0</field>
                 </block>
             </value>
         </block>

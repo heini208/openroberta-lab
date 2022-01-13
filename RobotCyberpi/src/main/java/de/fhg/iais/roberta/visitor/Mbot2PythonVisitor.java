@@ -769,7 +769,7 @@ public final class Mbot2PythonVisitor extends AbstractPythonVisitor implements I
     public Void visitWaitTimeStmt(WaitTimeStmt<Void> waitTimeStmt) {
         this.sb.append("time.sleep(");
         waitTimeStmt.getTime().accept(this);
-        this.sb.append("/100)");
+        this.sb.append("/1000)");
         return null;
     }
 
