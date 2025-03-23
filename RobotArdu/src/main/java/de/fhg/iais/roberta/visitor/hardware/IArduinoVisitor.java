@@ -37,6 +37,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.VoltageSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJob;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJobResult;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJobStatus;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.SimulationJob;
 import de.fhg.iais.roberta.visitor.IVisitor;
 
 public interface IArduinoVisitor<V> extends IVisitor<V> {
@@ -113,4 +117,12 @@ public interface IArduinoVisitor<V> extends IVisitor<V> {
     V visitNeuralNetworkInitClassifyData(NeuralNetworkInitClassifyData nn);
 
     V visitNeuralNetworkClassify(NeuralNetworkClassify nn);
+
+    V visitSimulationJob(SimulationJob job);
+
+    V visitIBMJob(IBMJob job);
+
+    V visitIBMJobResult(IBMJobResult ibmJobResult);
+
+    V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
 }

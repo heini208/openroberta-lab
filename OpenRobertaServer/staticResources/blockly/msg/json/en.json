@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2024-11-04 14:33:51.984184",
+		"lastupdated": "2025-03-23 02:32:31.839583",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -700,6 +700,7 @@
 	"TOOLBOX_COMMUNICATION": "Messages",
 	"TOOLBOX_PIN": "Pin",
 	"TOOLBOX_SENSOR": "Sensors",
+	"TOOLBOX_QISKIT": "QISKIT",
 	"TOOLBOX_INTEGRATED_SENSOR": "Integrated Sensors",
 	"TOOLBOX_CONTROL": "Control",
 	"TOOLBOX_LOGIC": "Logic",
@@ -1586,6 +1587,7 @@
 	"SENSOR_RFID_ARDUINO": "RFID-RC522 reader",
 	"ACTION_LCD": "LCD 1602",
 	"ACTION_LCDI2C": "LCD 1602 I²C",
+	"ACTION_IBM": "IBM quantum platform",
 	"ACTION_LCD_MBOT2_BRUSH": "set display brush",
 	"ACTION_OLEDSSD1306I2C": "OLED SSD1306 I²C",
 	"ACTION_OMNIDRIVE": "omnidrive",
@@ -1623,6 +1625,7 @@
 	"RFID_TOOLTIP": "Represents an RFID reader.",
 	"KEY_TOOLTIP": "Represents a button.",
 	"LCD_TOOLTIP": "Represents an LCD display.",
+	"IBM_TOOLTIP": "Connect the lab to your IBM account.",
 	"ACTION_LCD_MBOT2_BRUSH_TOOLTIP": "Change the color of the next display action",
 	"LCDI2C_TOOLTIP": "Represents an LCD 1602 display with a soldered I²C module.",
 	"SSD1306I2C_TOOLTIP": "Represents an I²C OLED SSD1306 display (addresses 128x64: 0x3D, 128x32: 0x3C)",
@@ -1865,6 +1868,7 @@
 	"SENSOR_UNIT_METER": "m",
 	"SENSOR_UNIT_SPEED": "km/h",
 	"ADDRESS": "address",
+	"TOKEN": "token",
 	"ORA_GROUP_TO_SHARE_DOES_NOT_EXIST": "You do not own a user group with the name you entered. <br />Try again with a different name!",
 	"ORA_GROUP_MEMBER_SHARE_RESTRICTION_EXCEEDED": "You can only share programs with other members of your user group. The owner of your user group can automatically read your programs.",
 	"ORA_GROUP_ERROR_NAME_INVALID": "The name of the user group is invalid. Please do not use special characters and enter at least one character.",

@@ -52,6 +52,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.VoltageSensor;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJob;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJobResult;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.IBMJobStatus;
+import de.fhg.iais.roberta.syntax.sensors.arduino.arduino.SimulationJob;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.hardware.IArduinoVisitor;
 
@@ -216,6 +220,26 @@ public class ArduinoValidatorAndCollectorVisitor extends CommonNepoAndMotorValid
     @Override
     public Void visitNeuralNetworkClassify(NeuralNetworkClassify nn) {
         requiredComponentVisited(nn, nn.probabilities);
+        return null;
+    }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         return null;
     }
 

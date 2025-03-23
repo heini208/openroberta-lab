@@ -54,6 +54,12 @@
         <block type="robSensors_motion_getSample"/>
         <block type="robSensors_light_getSample"/>
     </category>
+    <category name="TOOLBOX_QISKIT" svg="true">
+        <block type='robSensors_qiskit_start_job_simulation'/>
+        <block type='robSensors_qiskit_start_job_ibm'/>
+        <block type='robSensors_qiskit_job_status'/>
+        <block type='robSensors_qiskit_job_result'/>
+    </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <block type="robControls_if"/>
         <block type="robControls_ifElse"/>
