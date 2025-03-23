@@ -648,6 +648,10 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
             this.src.add(header);
             nlIndent();
         }
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed("SIM") || this.getBean(UsedHardwareBean.class).isActorUsed("IBM") ) {
+            this.src.add("#include <Arduino_Qiskit/src/Arduino_Qiskit.h>");
+            nlIndent();
+        }
         this.src.add("#include <NEPODefs.h>");
         nlIndent();
 
@@ -1059,7 +1063,9 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
 
     @Override
     public Void visitSimulationJob(SimulationJob sensor) {
-        this.src.add("TESTING");
+        this.src.add("requestQubitMeasurement(");
+        sensor.qbits.accept(this);
+        this.src.add(")");
         return null;
     }
 

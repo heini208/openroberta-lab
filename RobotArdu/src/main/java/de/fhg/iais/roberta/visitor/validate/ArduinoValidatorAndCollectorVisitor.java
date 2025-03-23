@@ -225,21 +225,32 @@ public class ArduinoValidatorAndCollectorVisitor extends CommonNepoAndMotorValid
 
     @Override
     public Void visitSimulationJob(SimulationJob sensor) {
+        usedHardwareBuilder.addUsedActor(new UsedActor("", "SIM"));
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.SERIAL, SC.SERIAL));
         return null;
     }
 
     @Override
     public Void visitIBMJob(IBMJob job) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(job.getUserDefinedPort(), "IBM"));
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.SERIAL, SC.SERIAL));
+
         return null;
     }
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobResult.getUserDefinedPort(), "IBM"));
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.SERIAL, SC.SERIAL));
+
         return null;
     }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobStatus.getUserDefinedPort(), "IBM"));
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.SERIAL, SC.SERIAL));
+
         return null;
     }
 
