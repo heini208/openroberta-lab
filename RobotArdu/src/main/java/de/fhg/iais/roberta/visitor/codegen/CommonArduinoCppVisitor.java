@@ -63,6 +63,7 @@ import de.fhg.iais.roberta.visitor.hardware.IArduinoVisitor;
  * <b>The phrases covered are the sensors/actors common to ALL arduino variants.</b>
  */
 public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor implements IArduinoVisitor<Void> {
+    private final ConfigurationAst configurationAst;
 
     /**
      * Initialize the C++ code generator visitor.
@@ -71,6 +72,7 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
      */
     public CommonArduinoCppVisitor(List<List<Phrase>> phrases, ConfigurationAst brickConfiguration, ClassToInstanceMap<IProjectBean> beans) {
         super(phrases, brickConfiguration, beans);
+        this.configurationAst = brickConfiguration;
     }
 
     @Override
@@ -624,6 +626,7 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
                 case SC.DIGITAL_PIN:
                 case SC.ANALOG_PIN:
                 case SC.ROBOT:
+                case "IBM":
                     break;
                 case SC.LSM9DS1:
                     headerFiles.add("#include <Arduino_LSM9DS1.h>");
@@ -768,6 +771,8 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
                     this.src.add(");");
                     nlIndent();
                     break;
+                case "IBM":
+                    this.src.add("configureIBMToken(\"", usedConfigurationBlock.getOptProperty("TOKEN"),"\");").nlI();
                 case SC.ANALOG_PIN:
                     this.src.add("pinMode(_input_", usedConfigurationBlock.userDefinedPortName, ", INPUT);");
                     nlIndent();
@@ -836,6 +841,7 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
             switch ( cc.componentType ) {
                 case SC.ROBOT:
                 case SC.INFRARED:
+                case "IBM":
                     break;
                 case SC.HUMIDITY:
                     this.src.add("#define DHTPIN", blockName, " ", cc.getProperty("OUTPUT"));
@@ -1071,19 +1077,25 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
 
     @Override
     public Void visitIBMJob(IBMJob job) {
-        this.src.add("TESTING_IBM1");
+        this.src.add("startRealIBMJob(");
+        job.qbits.accept(this);
+        this.src.add(")");
         return null;
     }
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        this.src.add("TESTING_IBM2");
+        this.src.add("getJobResult(\"");
+        ibmJobResult.id.accept(this);
+        this.src.add("\")");
         return null;
     }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        this.src.add("TESTING_IBM3");
+        this.src.add("getJobStatus(\"");
+        ibmJobStatus.id.accept(this);
+        this.src.add("\")");
         return null;
     }
 
