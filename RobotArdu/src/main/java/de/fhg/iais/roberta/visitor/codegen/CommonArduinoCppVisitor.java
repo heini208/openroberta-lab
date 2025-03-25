@@ -773,6 +773,7 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
                     break;
                 case "IBM":
                     this.src.add("configureIBMToken(\"", usedConfigurationBlock.getOptProperty("TOKEN"),"\");").nlI();
+                    break;
                 case SC.ANALOG_PIN:
                     this.src.add("pinMode(_input_", usedConfigurationBlock.userDefinedPortName, ", INPUT);");
                     nlIndent();
@@ -1085,17 +1086,17 @@ public abstract class CommonArduinoCppVisitor extends NepoArduinoCppVisitor impl
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        this.src.add("getJobResult(\"");
+        this.src.add("getJobResult(");
         ibmJobResult.id.accept(this);
-        this.src.add("\")");
+        this.src.add(")");
         return null;
     }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        this.src.add("getJobStatus(\"");
+        this.src.add("getJobStatus(");
         ibmJobStatus.id.accept(this);
-        this.src.add("\")");
+        this.src.add(")");
         return null;
     }
 
