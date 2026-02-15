@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import org.apache.commons.text.WordUtils;
 
 import com.google.common.collect.ClassToInstanceMap;
@@ -104,8 +105,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoSetTouchMode;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoTouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.PinSetTouchMode;
@@ -1613,6 +1612,25 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitMoistureSensor(MoistureSensor moistureSensor) {
         this.src.add("(((float) _uBit.io.P2.getAnalogValue() / 950) * 100)");
+        return null;
+    }
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         return null;
     }
 

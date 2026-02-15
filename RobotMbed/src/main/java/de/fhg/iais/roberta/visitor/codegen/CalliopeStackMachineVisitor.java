@@ -2,6 +2,7 @@ package de.fhg.iais.roberta.visitor.codegen;
 
 import java.util.List;
 
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import org.json.JSONObject;
 
 import de.fhg.iais.roberta.bean.NNBean;
@@ -36,8 +37,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
 import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.visitor.ICalliopeVisitor;
@@ -228,6 +227,26 @@ public class CalliopeStackMachineVisitor extends MbedV2StackMachineVisitor imple
 
     @Override
     public Void visitMotionKitDualSetAction(MotionKitDualSetAction motionKitDualSetAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         return null;
     }
 }

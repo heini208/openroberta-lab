@@ -29,6 +29,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
 
 /**
  * Interface to be used with the visitor pattern to traverse an AST (and generate code, e.g.).
@@ -92,4 +96,11 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
 
     V visitMoistureSensor(MoistureSensor moistureSensor);
 
+    V visitSimulationJob(SimulationJob job);
+
+    V visitIBMJob(IBMJob job);
+
+    V visitIBMJobResult(IBMJobResult ibmJobResult);
+
+    V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
 }

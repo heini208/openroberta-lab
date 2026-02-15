@@ -47,8 +47,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoSetTouchMode;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoTouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.PinSetTouchMode;
@@ -423,6 +422,7 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
         return null;
     }
 
+
     @Override
     public Void visitLogoSetTouchMode(LogoSetTouchMode logoSetTouchMode) {
         ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(logoSetTouchMode.getUserDefinedPort());
@@ -438,6 +438,26 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
     @Override
     public Void visitPinSetTouchMode(PinSetTouchMode pinSetTouchMode) {
         usedHardwareBuilder.addUsedSensor(new UsedSensor(pinSetTouchMode.sensorport, "PIN", pinSetTouchMode.mode));
+        return null;
+    }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         return null;
     }
 

@@ -7,6 +7,10 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioReceiveAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.CalliopeMethods;
 import de.fhg.iais.roberta.visitor.ICalliopeVisitor;
@@ -43,5 +47,25 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
             usedMethodBuilder.addUsedMethod(CalliopeMethods.RECEIVE_MESSAGE);
         }
         return super.visitRadioReceiveAction(radioReceiveAction);
+    }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        return null;
     }
 }

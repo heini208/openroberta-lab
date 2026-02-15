@@ -48,6 +48,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
+import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -731,4 +735,29 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         }
         throw new DbcException("Invalid structure for Callibot encountered.");
     }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        this.src.add("TESTING");
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        this.src.add("TESTING_IBM1");
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        this.src.add("TESTING_IBM2");
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        this.src.add("TESTING_IBM3");
+        return null;
+    }
+
 }
