@@ -316,6 +316,24 @@
       ],
       "startView.model": [
         "app/roberta/models/startView.model"
+      ],
+      "partialFlashingUtils": [
+        "helper/partialFlashing/partialFlashingUtils"
+      ],
+      "asyncUtil": [
+        "helper/partialFlashing/asyncUtil"
+      ],
+      "microbitConstants": [
+        "helper/partialFlashing/microbitConstants"
+      ],
+      "calliopePartialFlashing": [
+        "helper/partialFlashing/calliopePartialFlashing"
+      ],
+      "calliopeIntelHex": [
+        "helper/partialFlashing/calliopeIntelHex"
+      ],
+      "calliopeDapWrapper": [
+        "helper/partialFlashing/calliopeDapWrapper"
       ]
     },
     "allowSyntheticDefaultImports": true

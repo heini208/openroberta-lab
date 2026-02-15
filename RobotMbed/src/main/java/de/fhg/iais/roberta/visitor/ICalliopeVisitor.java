@@ -16,8 +16,7 @@ import de.fhg.iais.roberta.syntax.action.mbed.MotionKitDualSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.MotionKitSingleSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
@@ -27,8 +26,9 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
+
 
 /**
  * Interface to be used with the visitor pattern to traverse an AST (and generate code, e.g.).
@@ -91,5 +91,42 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
     V visitCallibotKeysSensor(CallibotKeysSensor callibotKeysSensor);
 
     V visitMoistureSensor(MoistureSensor moistureSensor);
+
+    V visitSimulationJob(SimulationJob job);
+
+    V visitIBMJob(IBMJob job);
+
+    V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
+
+    V visitRunCircuitSim(RunCircuitSim runCircuitSim);
+
+    V visitRunCircuitIBM(RunCircuitIBM runCircuitIBM);
+
+    V visitGetJobResultSample(GetJobResultSample getJobResultSample);
+
+    V visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities);
+
+    V visitGetJobResultCounts(GetJobResultCounts getJobResultCounts);
+
+    V visitGetJobResultStates(GetJobResultStates getJobResultStates);
+
+    V visitCreateCircuit(CreateCircuit createCircuit);
+
+    V visitCloneCircuit(CloneCircuit cloneCircuit);
+
+    V visitMeasureQubit(MeasureQubit measure);
+
+    V visitMeasureAllQubits(MeasureAllQubits measureAll);
+
+    // Actions (do not return values)
+    V visitDeleteCircuit(DeleteCircuit deleteCircuit);
+
+    V visitResetCircuit(ResetCircuit resetCircuit);
+
+    V visitSingleQubitGate(SingleQubitGate singleQubitGate);
+
+    V visitRotationGate(RotationGate rotationGate);
+
+    V visitTwoQubitGate(TwoQubitGate twoQubitGate);
 
 }

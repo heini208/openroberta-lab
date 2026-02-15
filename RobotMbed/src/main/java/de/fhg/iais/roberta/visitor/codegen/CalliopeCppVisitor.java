@@ -8,7 +8,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import org.apache.commons.text.WordUtils;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
 
 import com.google.common.collect.ClassToInstanceMap;
 
@@ -44,8 +53,6 @@ import de.fhg.iais.roberta.syntax.action.mbed.RadioSendAction;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioSetChannelAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
 import de.fhg.iais.roberta.syntax.action.mbed.microbitV2.SoundToggleAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
@@ -104,11 +111,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoSetTouchMode;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.LogoTouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.microbitV2.PinSetTouchMode;
+
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
@@ -171,7 +177,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
      * initialize the C++ code generator visitor.
      *
      * @param robotConfiguration hardware configuration of the brick
-     * @param programPhrases to generate the code from
+     * @param programPhrases     to generate the code from
      */
     public CalliopeCppVisitor(List<List<Phrase>> programPhrases, ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean> beans) {
         super(programPhrases, beans);
@@ -180,15 +186,15 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     private static String getCallibotPin(ConfigurationComponent confComp, String port) {
         String portName = "";
-        for ( List<ConfigurationComponent> ccList : confComp.getSubComponents().values() ) {
-            for ( ConfigurationComponent cc : ccList ) {
-                if ( port.equals(cc.userDefinedPortName) ) {
+        for (List<ConfigurationComponent> ccList : confComp.getSubComponents().values()) {
+            for (ConfigurationComponent cc : ccList) {
+                if (port.equals(cc.userDefinedPortName)) {
                     portName = cc.componentProperties.get("PORT");
                     break;
                 }
             }
         }
-        if ( !portName.equals("") ) {
+        if (!portName.equals("")) {
             return CALLIBOT_TO_PIN_MAP.get(portName);
         } else {
             throw new DbcException("Invalid port!");
@@ -196,8 +202,8 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     private ConfigurationComponent getBusSubComponentForCallibot(ConfigurationComponent callibot, String userDefinedName) {
-        for ( ConfigurationComponent subComponent : callibot.getSubComponents().get("BUS") ) {
-            if ( subComponent.userDefinedPortName.equals(userDefinedName) ) {
+        for (ConfigurationComponent subComponent : callibot.getSubComponents().get("BUS")) {
+            if (subComponent.userDefinedPortName.equals(userDefinedName)) {
                 return subComponent;
             }
         }
@@ -215,7 +221,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitVarDeclaration(VarDeclaration var) {
         this.src.add(getLanguageVarTypeFromBlocklyType(var.getBlocklyType()));
-        if ( var.getBlocklyType().isArray() && var.value.getKind().hasName("EMPTY_EXPR") ) {
+        if (var.getBlocklyType().isArray() && var.value.getKind().hasName("EMPTY_EXPR")) {
             this.src.add(" &");
         }
         this.src.add(" ", var.getCodeSafeName());
@@ -223,9 +229,9 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     private Void generateUsedVars() {
-        for ( final VarDeclaration var : this.getBean(UsedHardwareBean.class).getVisitedVars() ) {
+        for (final VarDeclaration var : this.getBean(UsedHardwareBean.class).getVisitedVars()) {
             nlIndent();
-            if ( !var.value.getKind().hasName("EMPTY_EXPR") ) {
+            if (!var.value.getKind().hasName("EMPTY_EXPR")) {
                 this.src.add("___", var.name);
                 this.src.add(" = ");
                 var.value.accept(this);
@@ -238,21 +244,21 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitBinary(Binary binary) {
         final Op op = binary.op;
-        if ( op == Op.MOD ) {
+        if (op == Op.MOD) {
             this.src.add("(int) ");
-        } else if ( op == Op.NEQ ) {
+        } else if (op == Op.NEQ) {
             this.src.add("!( ");
         }
         generateSubExpr(this.src, false, binary.left, binary);
         final String sym;
-        if ( op.equals(Op.NEQ) ) {
+        if (op.equals(Op.NEQ)) {
             sym = "==";
         } else {
             sym = getBinaryOperatorSymbol(op);
         }
 
         this.src.add(" ", sym, " ");
-        switch ( op ) {
+        switch (op) {
             case DIVIDE:
                 this.src.add("((float) ");
                 generateSubExpr(this.src, parenthesesCheck(binary), binary.getRight(), binary);
@@ -276,7 +282,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitEmptyExpr(EmptyExpr emptyExpr) {
-        switch ( emptyExpr.getDefVal() ) {
+        switch (emptyExpr.getDefVal()) {
             case STRING:
                 this.src.add("\"\"");
                 break;
@@ -310,7 +316,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitRepeatStmt(RepeatStmt repeatStmt) {
         final boolean isWaitStmt = repeatStmt.mode == RepeatStmt.Mode.WAIT;
-        switch ( repeatStmt.mode ) {
+        switch (repeatStmt.mode) {
             case UNTIL:
             case WHILE:
             case FOREVER:
@@ -334,7 +340,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         }
         incrIndentation();
         repeatStmt.list.accept(this);
-        if ( !isWaitStmt ) {
+        if (!isWaitStmt) {
             addContinueLabelToLoop();
             nlIndent();
             this.src.add("_uBit.sleep(_ITERATION_SLEEP_TIMEOUT);");
@@ -377,7 +383,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         final String varType = displayTextAction.msg.getBlocklyType().toString();
         this.src.add("_uBit.display.");
         appendTextDisplayType(displayTextAction);
-        if ( !varType.equals("STRING") ) {
+        if (!varType.equals("STRING")) {
             ending = wrapInManageStringToDisplay(displayTextAction, ending);
         } else {
             displayTextAction.msg.accept(this);
@@ -423,12 +429,12 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         boolean isCallibotMotor = confComp == null && confCompCallibot != null;
         Assert.isTrue(confComp != null || confCompCallibot != null, "Missing both external motor and Callibot.");
 
-        if ( isCallibotMotor ) {
+        if (isCallibotMotor) {
             pin = getCallibotPin(confCompCallibot, port);
         } else {
             pin = confComp.getProperty("PIN1");
         }
-        switch ( pin ) {
+        switch (pin) {
             case "0":
             case "2":
                 this.src.add("_cbSetMotor(_buf, &_i2c, ", pin, ", ");
@@ -438,7 +444,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
             case "A":
             case "B":
                 this.src.add("_uBit.soundmotor.motor");
-                if ( isDualMode() ) {
+                if (isDualMode()) {
                     this.src.add(pin);
                 }
                 this.src.add("On(");
@@ -461,24 +467,24 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         boolean isCallibotMotor = confComp == null && confCompCallibot != null;
         Assert.isTrue(confComp != null || confCompCallibot != null, "Missing both external motor and Callibot.");
 
-        if ( isCallibotMotor ) {
+        if (isCallibotMotor) {
             pin = getCallibotPin(confCompCallibot, port);
         } else {
             pin = confComp.getProperty("PIN1");
         }
-        switch ( pin ) {
+        switch (pin) {
             case "0":
             case "2":
                 this.src.add("_cbSetMotor(_buf, &_i2c, ", pin, ", 0);");
                 break;
             case "A":
             case "B":
-                if ( isDualMode() ) {
+                if (isDualMode()) {
                     this.src.add("_uBit.soundmotor.motor", pin, "Off();"); // Coast vs OFF
                     this.src.add("//float, break and sleep doesn't work with more than one motor connected");
                 } else {
                     this.src.add("_uBit.soundmotor.motor");
-                    switch ( (MotorStopMode) motorStopAction.mode ) {
+                    switch ((MotorStopMode) motorStopAction.mode) {
                         case FLOAT:
                             this.src.add("Coast();");
                             break;
@@ -517,12 +523,12 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitGestureSensor(GestureSensor gestureSensor) {
         String mode = gestureSensor.getMode();
-        if ( mode.equals("SHAKE") ) {
+        if (mode.equals("SHAKE")) {
             this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.IS_GESTURE_SHAKE));
             this.src.add("()");
         } else {
             this.src.add("(_uBit.accelerometer.getGesture() == MICROBIT_ACCELEROMETER_EVT_");
-            if ( mode.equals(SC.UP) || mode.equals(SC.DOWN) || mode.equals(SC.LEFT) || mode.equals(SC.RIGHT) ) {
+            if (mode.equals(SC.UP) || mode.equals(SC.DOWN) || mode.equals(SC.LEFT) || mode.equals(SC.RIGHT)) {
                 this.src.add("TILT_");
             }
             this.src.add(mode, ")");
@@ -576,7 +582,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitUltrasonicSensor(UltrasonicSensor ultrasonicSensor) {
         ConfigurationComponent confCompCallibot = this.robotConfiguration.optConfigurationComponentByType(SC.CALLIBOT);
-        if ( confCompCallibot != null ) {
+        if (confCompCallibot != null) {
             this.src.add("_cbGetSampleUltrasonic(_buf, &_i2c)");
         } else {
             // Safe to say that an external ultrasonic sensor is being used in the configuration
@@ -588,10 +594,10 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         ConfigurationComponent confComp = this.robotConfiguration.optConfigurationComponentByType(SC.CALLIBOT);
-        if ( confComp != null ) {
+        if (confComp != null) {
             String port = infraredSensor.getUserDefinedPort();
             String pin = getCallibotPin(confComp, port);
-            if ( pin.equals("1") || pin.contentEquals("2") ) {
+            if (pin.equals("1") || pin.contentEquals("2")) {
                 this.src.add("_cbGetSampleInfrared(_buf, &_i2c, ", pin, ")");
             } else {
                 throw new DbcException("InfraredSensor; Invalid infrared port: " + port);
@@ -605,9 +611,9 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitGyroSensor(GyroSensor gyroSensor) {
         String slot = gyroSensor.getSlot();
-        if ( slot.equals("X") ) { // TODO rename to Pitch and Roll in the configuration?
+        if (slot.equals("X")) { // TODO rename to Pitch and Roll in the configuration?
             this.src.add("_uBit.accelerometer.getPitch()");
-        } else if ( slot.equals("Y") ) {
+        } else if (slot.equals("Y")) {
             this.src.add("_uBit.accelerometer.getRoll()");
         } else {
             throw new DbcException("Slot " + slot + " is not valid!");
@@ -640,7 +646,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         String pin1 = configurationComponent.getProperty("PIN1");
         String mode = pinValueSensor.getMode();
         this.src.add("_uBit.io.", PIN_MAP.get(pin1));
-        switch ( mode ) {
+        switch (mode) {
             case SC.DIGITAL:
                 this.src.add(".getDigitalValue()");
                 break;
@@ -673,7 +679,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitMainTask(MainTask mainTask) {
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TIMER) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TIMER)) {
             this.src.add("int _initTime = _uBit.systemTime();");
         }
         mainTask.variables.accept(this);
@@ -686,18 +692,18 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         nlIndent();
         // Initialise the micro:bit runtime.
         this.src.add("_uBit.init();");
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT)) {
             nlIndent();
             this.src.add("_cbInit(_buf, &_i2c, &_uBit);");
         }
-        if ( this.robotConfiguration.isComponentTypePresent(SC.DIGITAL_PIN) ) {
-            for ( ConfigurationComponent usedConfigurationBlock : this.robotConfiguration.getConfigurationComponentsValues() ) {
-                if ( usedConfigurationBlock.componentType.equals(SC.DIGITAL_PIN) ) {
+        if (this.robotConfiguration.isComponentTypePresent(SC.DIGITAL_PIN)) {
+            for (ConfigurationComponent usedConfigurationBlock : this.robotConfiguration.getConfigurationComponentsValues()) {
+                if (usedConfigurationBlock.componentType.equals(SC.DIGITAL_PIN)) {
                     String pin1 = usedConfigurationBlock.getProperty("PIN1");
                     String mode = usedConfigurationBlock.getProperty("PIN_PULL");
-                    if ( mode.equals("PIN_PULL_UP") ) {
+                    if (mode.equals("PIN_PULL_UP")) {
                         mode = "UP";
-                    } else if ( mode.equals("PIN_PULL_DOWN") ) {
+                    } else if (mode.equals("PIN_PULL_DOWN")) {
                         mode = "DOWN";
                     } else {
                         continue;
@@ -707,11 +713,11 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
                 }
             }
         }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COLOR) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COLOR)) {
             String integrationTime = "2_4MS";
             String gain = "1X";
-            for ( ConfigurationComponent usedConfigurationBlock : this.robotConfiguration.getConfigurationComponentsValues() ) {
-                if ( usedConfigurationBlock.componentType.equals(SC.COLOUR) ) {
+            for (ConfigurationComponent usedConfigurationBlock : this.robotConfiguration.getConfigurationComponentsValues()) {
+                if (usedConfigurationBlock.componentType.equals(SC.COLOUR)) {
                     integrationTime = usedConfigurationBlock.getProperty("I_TIME");
                     gain = usedConfigurationBlock.getProperty("GAIN");
                     break;
@@ -727,18 +733,18 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
         nlIndent();
 
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DISPLAY_GRAYSCALE) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.DISPLAY_GRAYSCALE)) {
             this.src.add("_uBit.display.setDisplayMode(DISPLAY_MODE_GREYSCALE);");
         }
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.RADIO) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.RADIO)) {
             nlIndent();
             this.src.add("_uBit.radio.enable();");
         }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.ACCELEROMETER) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COMPASS) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.ACCELEROMETER) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COMPASS)) {
             nlIndent();
             this.src.add("_uBit.accelerometer.updateSample();");
         }
-        if ( this.isDualMode() && this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE) ) {
+        if (this.isDualMode() && this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE)) {
             this.src.add("nrf_gpiote_task_configure(0, CALLIOPE_PIN_MOTOR_IN2, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_HIGH);");
             nlIndent();
             this.src.add("nrf_gpiote_task_configure(1, CALLIOPE_PIN_MOTOR_IN1, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);");
@@ -831,11 +837,11 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     public Void visitTextJoinFunct(TextJoinFunct textJoinFunct) {
         final List<Expr> parameters = textJoinFunct.param.get();
         final int numberOfParameters = parameters.size();
-        for ( int i = 0; i < numberOfParameters; i++ ) {
+        for (int i = 0; i < numberOfParameters; i++) {
             this.src.add("ManagedString(");
             parameters.get(i).accept(this);
             this.src.add(")");
-            if ( i < numberOfParameters - 1 ) {
+            if (i < numberOfParameters - 1) {
                 this.src.add(" + ");
             }
         }
@@ -851,7 +857,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitDisplayImageAction(DisplayImageAction displayImageAction) {
         String end = ");";
-        if ( displayImageAction.displayImageMode.equals("ANIMATION") ) {
+        if (displayImageAction.displayImageMode.equals("ANIMATION")) {
             try {
                 Expr values = displayImageAction.valuesToDisplay;
                 int valuesSize = ((ListCreate) values).exprList.get().size();
@@ -859,7 +865,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
                 displayImageAction.valuesToDisplay.accept(this);
                 this.src.add(");");
                 nlIndent();
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 this.src.add("for (MicroBitImage& image : ");
                 displayImageAction.valuesToDisplay.accept(this);
                 this.src.add(") {");
@@ -870,7 +876,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
             }
         }
         this.src.add("_uBit.display.");
-        if ( displayImageAction.displayImageMode.equals("ANIMATION") ) {
+        if (displayImageAction.displayImageMode.equals("ANIMATION")) {
             this.src.add("animateImages(_animation, 200);");
             return null;
         } else {
@@ -900,16 +906,16 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitImage(Image image) {
         this.src.add("MicroBitImage(\"");
-        for ( int i = 0; i < 5; i++ ) {
-            for ( int j = 0; j < 5; j++ ) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
                 String pixel = image.image[i][j].trim();
-                if ( pixel.equals("#") ) {
+                if (pixel.equals("#")) {
                     pixel = "9";
-                } else if ( pixel.equals("") ) {
+                } else if (pixel.equals("")) {
                     pixel = "0";
                 }
                 this.src.add(map(Integer.parseInt(pixel), 0, 9, 0, 255));
-                if ( j < 4 ) {
+                if (j < 4) {
                     this.src.add(",");
                 }
             }
@@ -922,7 +928,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitColorConst(ColorConst colorConst) {
         this.src
-            .add("MicroBitColor(", colorConst.getRedChannelInt(), ", ", colorConst.getGreenChannelInt(), ", ", colorConst.getBlueChannelInt(), ", ", 255, ")");
+                .add("MicroBitColor(", colorConst.getRedChannelInt(), ", ", colorConst.getGreenChannelInt(), ", ", colorConst.getBlueChannelInt(), ", ", 255, ")");
         return null;
     }
 
@@ -963,7 +969,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         ConfigurationComponent confComp = this.robotConfiguration.optConfigurationComponentByType(SC.CALLIBOT);
         String pin1 = getCallibotPin(confComp, ledAction.port);
         String mode = "";
-        switch ( ledAction.mode ) {
+        switch (ledAction.mode) {
             case "OFF":
                 mode = "0";
                 break;
@@ -981,7 +987,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     public Void visitRadioSendAction(RadioSendAction radioSendAction) {
         this.src.add("_uBit.radio.setTransmitPower(", radioSendAction.power, ");");
         nlIndent();
-        switch ( radioSendAction.type ) {
+        switch (radioSendAction.type) {
             case "Number":
                 this.src.add("_uBit.radio.datagram.send(ManagedString((int)(");
                 radioSendAction.message.accept(this);
@@ -1007,7 +1013,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitRadioReceiveAction(RadioReceiveAction radioReceiveAction) {
-        switch ( radioReceiveAction.type ) {
+        switch (radioReceiveAction.type) {
             case "Boolean":
             case "Number":
                 this.src.add("atoi((char*)_uBit.radio.datagram.recv().getBytes())");
@@ -1038,7 +1044,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitAccelerometerSensor(AccelerometerSensor accelerometerSensor) {
         this.src.add("_uBit.accelerometer.get");
-        if ( accelerometerSensor.getSlot().equals("STRENGTH") ) {
+        if (accelerometerSensor.getSlot().equals("STRENGTH")) {
             this.src.add("Strength");
         } else {
             this.src.add(accelerometerSensor.getSlot());
@@ -1127,7 +1133,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     protected void generateProgramPrefix(boolean withWrapping) {
-        if ( !withWrapping ) {
+        if (!withWrapping) {
             return;
         }
         addIncludes();
@@ -1136,8 +1142,8 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     protected void generateProgramSuffix(boolean withWrapping) {
-        if ( withWrapping ) {
-            if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT) ) {
+        if (withWrapping) {
+            if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT)) {
                 nlIndent();
                 this.src.add("_cbStop(_buf, &_i2c);");
             }
@@ -1155,7 +1161,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     protected String getLanguageVarTypeFromBlocklyType(BlocklyType type) {
-        switch ( type ) {
+        switch (type) {
             case ANY:
             case COMPARABLE:
             case ADDABLE:
@@ -1204,7 +1210,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     private void appendTextDisplayType(DisplayTextAction displayTextAction) {
-        if ( Objects.equals(displayTextAction.mode, "TEXT") ) {
+        if (Objects.equals(displayTextAction.mode, "TEXT")) {
             this.src.add("scroll(");
         } else {
             this.src.add("print(");
@@ -1219,7 +1225,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     private String capitalizeFirstLetter(String original) {
-        if ( original == null || original.length() == 0 ) {
+        if (original == null || original.length() == 0) {
             return original;
         }
         return original.substring(0, 1).toUpperCase() + original.substring(1).toLowerCase();
@@ -1230,39 +1236,39 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         this.src.add("#include \"MicroBit.h\"\n");
         this.src.add("#include \"NEPODefs.h\"\n");
 
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.FOUR_DIGIT_DISPLAY) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.FOUR_DIGIT_DISPLAY)) {
             this.src.add("#include \"FourDigitDisplay.h\"\n");
         }
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.LED_BAR) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.LED_BAR)) {
             this.src.add("#include \"Grove_LED_Bar.h\"\n");
         }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.HUMIDITY) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.HUMIDITY)) {
             this.src.add("#include \"Sht31.h\"\n");
         }
-        if ( this.isDualMode() && this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE) ) {
+        if (this.isDualMode() && this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE)) {
             this.src.add("#include \"nrf_gpiote.h\"\n");
         }
         this.src.add("#include <list>\n");
         this.src.add("#include <array>\n");
         this.src.add("#include <stdlib.h>\n");
         this.src.add("MicroBit _uBit;\n");
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.FOUR_DIGIT_DISPLAY) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.FOUR_DIGIT_DISPLAY)) {
             this.src.add("FourDigitDisplay _fdd(MICROBIT_PIN_P2, MICROBIT_PIN_P8);\n"); // Only works on the right UART Grove connector
         }
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.LED_BAR) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.LED_BAR)) {
             this.src.add("Grove_LED_Bar _ledBar(MICROBIT_PIN_P8, MICROBIT_PIN_P2);\n"); // Only works on the right UART Grove connector; Clock/Data pins are swapped compared to 4DigitDisplay
         }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.HUMIDITY) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.HUMIDITY)) {
             this.src.add("Sht31 _sht31 = Sht31(MICROBIT_PIN_P8, MICROBIT_PIN_P2);\n");
         }
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT) ) {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.CALLIBOT)) {
             this.src.add("MicroBitI2C _i2c(MICROBIT_PIN_P20, MICROBIT_PIN_P19);");
             nlIndent();
             this.src.add("char _buf[5] = { 0, 0, 0, 0, 0 };");
             nlIndent();
             this.src.add("uint8_t _cbLedState = 0x00;");
         }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COLOR) ) {
+        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.COLOR)) {
             this.src.add("MicroBitI2C _i2c(MICROBIT_PIN_P20, MICROBIT_PIN_P19);");
             nlIndent();
             this.src.add("char _buf[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };");
@@ -1277,7 +1283,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     protected void generateSignaturesOfUserDefinedMethods() {
-        for ( final Method phrase : this.getBean(UsedHardwareBean.class).getUserDefinedMethods() ) {
+        for (final Method phrase : this.getBean(UsedHardwareBean.class).getUserDefinedMethods()) {
             nlIndent();
             this.src.add(getLanguageVarTypeFromBlocklyType(phrase.getReturnType()));
             this.src.add(" ", phrase.getCodeSafeMethodName(), "(");
@@ -1296,10 +1302,10 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         ConfigurationComponent confCompCallibot = this.robotConfiguration.optConfigurationComponentByType(SC.CALLIBOT);
 
         boolean isCallibotMotor = confCompA == null && confCompB == null && confCompCallibot != null;
-        if ( isCallibotMotor ) {
+        if (isCallibotMotor) {
             ConfigurationComponent subComponentForCallibot = getBusSubComponentForCallibot(confCompCallibot, portA);
             this.src.add("_cbSetMotors(_buf, &_i2c, ");
-            if ( subComponentForCallibot.componentProperties.get("PORT").equals("MOTOR_L") ) {
+            if (subComponentForCallibot.componentProperties.get("PORT").equals("MOTOR_L")) {
                 bothMotorsOnAction.speedA.accept(this);
                 this.src.add(", ");
                 bothMotorsOnAction.speedB.accept(this);
@@ -1325,20 +1331,20 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     public Void visitBothMotorsStopAction(BothMotorsStopAction bothMotorsStopAction) {
         Set<String> motorPorts = getMotorPins();
         boolean newLine = false;
-        if ( motorPorts.contains("A") ) { // Internal motors
+        if (motorPorts.contains("A")) { // Internal motors
             this.src.add("_uBit.soundmotor.motorAOff();");
             newLine = true;
         }
-        if ( motorPorts.contains("B") ) {
-            if ( newLine ) {
+        if (motorPorts.contains("B")) {
+            if (newLine) {
                 nlIndent();
             } else {
                 newLine = true;
             }
             this.src.add("_uBit.soundmotor.motorBOff();");
         }
-        if ( motorPorts.contains("0") ) { // Calli:bot motors
-            if ( newLine ) {
+        if (motorPorts.contains("0")) { // Calli:bot motors
+            if (newLine) {
                 nlIndent();
             }
             this.src.add("_cbSetMotors(_buf, &_i2c, 0, 0);");
@@ -1362,7 +1368,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitListGetIndex(ListGetIndex listGetIndex) {
         super.visitListGetIndex(listGetIndex);
-        if ( listGetIndex.getElementOperation().equals(ListElementOperations.REMOVE) ) {
+        if (listGetIndex.getElementOperation().equals(ListElementOperations.REMOVE)) {
             this.src.add(";");
         }
         return null;
@@ -1375,9 +1381,9 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     private void writeToSerial(Expr valueToWrite) {
-        if ( valueToWrite instanceof RgbColor
-            || valueToWrite instanceof ColorConst
-            || valueToWrite instanceof Var && valueToWrite.getBlocklyType().equals(BlocklyType.COLOR) ) {
+        if (valueToWrite instanceof RgbColor
+                || valueToWrite instanceof ColorConst
+                || valueToWrite instanceof Var && valueToWrite.getBlocklyType().equals(BlocklyType.COLOR)) {
             this.src.add("_uBit.serial.setTxBufferSize(ManagedString(_castColorToString(");
             valueToWrite.accept(this);
             this.src.add(")).length() + 2);");
@@ -1404,9 +1410,9 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitHumiditySensor(HumiditySensor humiditySensor) {
-        if ( humiditySensor.getMode().equals(SC.HUMIDITY) ) {
+        if (humiditySensor.getMode().equals(SC.HUMIDITY)) {
             this.src.add("_sht31.readHumidity()");
-        } else if ( humiditySensor.getMode().equals(SC.TEMPERATURE) ) {
+        } else if (humiditySensor.getMode().equals(SC.TEMPERATURE)) {
             this.src.add("_sht31.readTemperature()");
         } else {
             throw new UnsupportedOperationException("Mode " + humiditySensor.getMode() + " not supported!");
@@ -1421,7 +1427,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitSwitchLedMatrixAction(SwitchLedMatrixAction switchLedMatrixAction) {
-        if ( switchLedMatrixAction.activated.equals("ON") ) {
+        if (switchLedMatrixAction.activated.equals("ON")) {
             this.src.add("_uBit.display.enable();");
         } else {
             this.src.add("_uBit.display.disable();");
@@ -1437,7 +1443,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
     @Override
     public Void visitAssertStmt(AssertStmt assertStmt) {
-        if ( ((Binary) assertStmt.asserts).left.getBlocklyType().equals(BlocklyType.COLOR) ) {
+        if (((Binary) assertStmt.asserts).left.getBlocklyType().equals(BlocklyType.COLOR)) {
             this.src.add("assertNepo((");
             assertStmt.asserts.accept(this);
             this.src.add("), \"", assertStmt.msg, "\", \"");
@@ -1459,7 +1465,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
 
         boolean isCallibotServoMotor = confComp == null && confCompCallibot != null;
         Assert.isTrue(confComp != null || confCompCallibot != null, "Missing both external servo motor and Callibot.");
-        if ( isCallibotServoMotor ) {
+        if (isCallibotServoMotor) {
             this.src.add("_cbSetServo(_buf, &_i2c, ");
             String i2cAddress = getCallibotPin(confCompCallibot, port);
             this.src.add(i2cAddress);
@@ -1482,8 +1488,8 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         String direction = motionKitSingleSetAction.direction;
         // for the right motor (C16) 0 is forwards and 180 is backwards
         // for the left  motor (C17) 180 is forwards and 0 is backwards
-        if ( userDefinedName.equals(SC.BOTH) ) {
-            switch ( direction ) {
+        if (userDefinedName.equals(SC.BOTH)) {
+            switch (direction) {
                 case SC.FOREWARD:
                     this.src.add("_uBit.io.", rightMotorPort, ".setServoValue(0);");
                     nlIndent();
@@ -1503,7 +1509,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
                     throw new DbcException("Invalid direction!");
             }
         } else {
-            switch ( motionKitSingleSetAction.direction ) {
+            switch (motionKitSingleSetAction.direction) {
                 case SC.FOREWARD:
                     this.src.add("_uBit.io.", currentPort, ".setServoValue(");
                     this.src.add(currentPort.equals(rightMotorPort) ? 0 : 180);
@@ -1530,7 +1536,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         String leftMotorPort = PIN_MAP.get("C17"); // C17 is the left motor
         // for the right motor (C16) 0 is forwards and 180 is backwards
         // for the left  motor (C17) 180 is forwards and 0 is backwards
-        switch ( motionKitDualSetAction.directionRight ) {
+        switch (motionKitDualSetAction.directionRight) {
             case SC.FOREWARD:
                 this.src.add("_uBit.io.", rightMotorPort, ".setServoValue(0);");
                 break;
@@ -1544,7 +1550,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
                 throw new DbcException("Invalid direction!");
         }
         nlIndent();
-        switch ( motionKitDualSetAction.directionLeft ) {
+        switch (motionKitDualSetAction.directionLeft) {
             case SC.FOREWARD:
                 this.src.add("_uBit.io.", leftMotorPort, ".setServoValue(180);");
                 break;
@@ -1563,7 +1569,7 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitColorSensor(ColorSensor colorSensor) {
 
-        switch ( colorSensor.getMode() ) {
+        switch (colorSensor.getMode()) {
             case SC.COLOUR:
                 this.src.add("_TCS3472_getColor(_buf, _TCS3472_color, &_i2c, &_uBit, _TCS3472_time)");
                 break;
@@ -1596,10 +1602,10 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     @Override
     public Void visitCallibotKeysSensor(CallibotKeysSensor callibotKeysSensor) {
         ConfigurationComponent confComp = this.robotConfiguration.optConfigurationComponentByType(SC.CALLIBOT);
-        if ( confComp != null ) {
+        if (confComp != null) {
             String port = callibotKeysSensor.getUserDefinedPort();
             String pin = getCallibotPin(confComp, port);
-            if ( pin.equals("1") || pin.contentEquals("2") ) {
+            if (pin.equals("1") || pin.contentEquals("2")) {
                 this.src.add("_cbGetSampleBumperKey(_buf, &_i2c, ", pin, ")");
             } else {
                 throw new DbcException("InfraredSensor; Key port: " + port);
@@ -1616,16 +1622,107 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
         return null;
     }
 
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
+        return null;
+    }
+
+    @Override
+    public Void visitCreateCircuit(CreateCircuit createCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureQubit(MeasureQubit measure) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
+        return null;
+    }
+
+    @Override
+    public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitResetCircuit(ResetCircuit resetCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitRotationGate(RotationGate rotationGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
+        return null;
+    }
+
     private Set<String> getMotorPins() {
         Set<String> motorPins = new HashSet<>();
-        for ( ConfigurationComponent confComp : this.robotConfiguration.getConfigurationComponentsValues() ) {
+        for (ConfigurationComponent confComp : this.robotConfiguration.getConfigurationComponentsValues()) {
             String componentType = confComp.componentType;
-            if ( componentType.equals("MOTOR") ) {
+            if (componentType.equals("MOTOR")) {
                 motorPins.add(confComp.getProperty("PIN1"));
-            } else if ( componentType.equals("CALLIBOT") ) {
-                for ( List<ConfigurationComponent> ccList : confComp.getSubComponents().values() ) {
-                    for ( ConfigurationComponent cc : ccList ) {
-                        if ( cc.componentType.equals("MOTOR") ) {
+            } else if (componentType.equals("CALLIBOT")) {
+                for (List<ConfigurationComponent> ccList : confComp.getSubComponents().values()) {
+                    for (ConfigurationComponent cc : ccList) {
+                        if (cc.componentType.equals("MOTOR")) {
                             motorPins.add(CALLIBOT_TO_PIN_MAP.get(cc.componentProperties.get("PORT")));
                         }
                     }

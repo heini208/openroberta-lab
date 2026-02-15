@@ -147,3 +147,294 @@ GET_ROTATION:
             if factor != 0:
                 pitch = math.atan(-x / (factor))            
                 return math.floor((360*pitch)/(2*math.pi))
+
+SETUP_WIFI:
+  PYTHON: |
+    def wifi_connect(ssid, password):
+        init_uart()
+    
+        at_cmd("AT", timeout_ms=300, expect_ok=False)
+        at_cmd("ATE0", timeout_ms=250, expect_ok=False)
+        flush_uart()
+    
+        ok, resp = at_cmd("AT+CWJAP_CUR?", timeout_ms=5000, expect_ok=False)
+        flush_uart()
+    
+        if ok and ssid in resp:
+            wifi_tcp_prepare()
+            calliopemini.display.show(calliopemini.Image.YES)
+            calliopemini.sleep(500)
+            calliopemini.display.clear()
+            return True
+    
+        steps = [
+            ("AT+CWMODE_CUR=1", 3000, False),
+            ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000, True),
+            ("AT+CIFSR", 800, False),
+        ]
+    
+        for i, (cmd, timeout, expect_ok) in enumerate(steps):
+            calliopemini.display.show(len(steps) - i - 1)
+            ok, _ = at_cmd(cmd, timeout_ms=timeout, expect_ok=expect_ok)
+            flush_uart()
+    
+            if not ok and expect_ok:
+                calliopemini.display.show(calliopemini.Image.NO)
+                calliopemini.sleep(500)
+                calliopemini.display.clear()
+                return False
+    
+        wifi_tcp_prepare()
+        calliopemini.display.show(calliopemini.Image.YES)
+        calliopemini.sleep(500)
+        calliopemini.display.clear()
+        return True
+    
+    def wifi_tcp_prepare():
+        cmds = [
+            "AT+CIPMUX=0",
+            "AT+CIPMODE=0",
+            "AT+CIPDINFO=0",
+            "AT+CIPRECVMODE=0",
+            "AT+SLEEP=0",
+        ]
+    
+        for cmd in cmds:
+            at_cmd(cmd, timeout_ms=700, expect_ok=False)
+            flush_uart(100)
+    
+    def init_uart():
+        _UART.init(baudrate=_UART_BAUD, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
+    
+    def at_cmd(cmd, timeout_ms=1200, expect_ok=True):
+        _UART.write((cmd + "\r\n").encode("utf-8"))
+        resp = uart_read_all(timeout_ms)
+        ok = (("OK" in resp) if expect_ok else True) and ("ERROR" not in resp)
+        return ok, resp
+    
+    def uart_read_all(timeout_ms):
+        start = calliopemini.running_time()
+        buf = ""
+        while calliopemini.running_time() - start < timeout_ms:
+            if _UART.any():
+                buf += safe_decode(_UART.read())
+            else:
+                calliopemini.sleep(10)
+        return buf
+    
+    def safe_decode(chunk):
+        try:
+            return chunk.decode("utf-8")
+        except Exception:
+            return "".join(chr(b) for b in chunk)
+    
+    def flush_uart(ms=250):
+        start = calliopemini.running_time()
+        while calliopemini.running_time() - start < ms:
+            if _UART.any():
+                _UART.read()
+            calliopemini.sleep(10)
+    
+    def send_cmd_raw(cmd, timeout_ms=3000):
+        resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=timeout_ms)
+        if resp is None:
+            return None
+        return resp.strip()
+
+SEND_AND_WAIT:
+  PYTHON: |
+    def get_ipd_len(header):
+        body = header[5:]
+        before_ip = body.split('"', 1)[0]
+        fields = [x.strip() for x in before_ip.split(",") if x.strip() != ""]
+    
+        try:
+            if len(fields) == 1:
+                return int(fields[0])
+            if int(fields[0]) <= 4:
+                return int(fields[1])
+            return int(fields[0])
+        except:
+            return None
+    
+    def extract_ipd_payload(raw):
+        out = ""
+        i = 0
+    
+        while True:
+            p = raw.find("+IPD,", i)
+            if p == -1:
+                break
+    
+            colon = raw.find(":", p)
+            if colon == -1:
+                break
+    
+            header = raw[p:colon]
+            n = get_ipd_len(header)
+    
+            if n is None:
+                i = colon + 1
+                continue
+    
+            data_start = colon + 1
+            data_end = data_start + n
+    
+            if len(raw) < data_end:
+                break
+    
+            out += raw[data_start:data_end]
+            i = data_end
+    
+        return out
+    
+    def extract_len_payload(out):
+        p = out.find("LEN:")
+        if p == -1:
+            return None
+    
+        nl = out.find("\n", p)
+        if nl == -1:
+            return None
+    
+        try:
+            n = int(out[p + 4:nl].strip())
+        except:
+            return None
+    
+        payload = out[nl + 1:]
+    
+        if len(payload) < n:
+            return None
+    
+        return payload[:n]
+    
+    def read_tcp_response(timeout_ms):
+        start = calliopemini.running_time()
+        raw = ""
+    
+        while calliopemini.running_time() - start < timeout_ms:
+            if _UART.any():
+                raw += safe_decode(_UART.read())
+    
+                out = extract_ipd_payload(raw)
+                payload = extract_len_payload(out)
+    
+                if payload is not None:
+                    return payload
+            else:
+                calliopemini.sleep(10)
+    
+        return None
+    
+    def send_tcp_command(host, port, payload, timeout_ms=6000):
+        flush_uart(200)
+    
+        ok, resp = at_cmd(
+            'AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)),
+            timeout_ms=2500,
+            expect_ok=False
+        )
+    
+        if "ERROR" in resp or resp.strip() == "":
+            return None
+    
+        payload_line = payload if payload.endswith("\n") else payload + "\n"
+        send_len = len(payload_line.encode("utf-8"))
+    
+        ok, resp = at_cmd(
+            "AT+CIPSEND={0}".format(send_len),
+            timeout_ms=1500,
+            expect_ok=False
+        )
+    
+        if ">" not in resp:
+            resp += uart_read_all(600)
+    
+        if ">" not in resp:
+            at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
+            return None
+    
+        _UART.write(payload_line.encode("utf-8"))
+        result = read_tcp_response(timeout_ms)
+    
+        at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
+        flush_uart(200)
+    
+        return result
+
+SETUP_IBM:
+  PYTHON: |
+    def init_ibm(token):
+        resp = send_cmd_raw("CONFIGURE_IBM {}".format(token), timeout_ms=3000)
+
+        if resp and "OK" in resp:
+            calliopemini.display.show(calliopemini.Image.YES)
+            calliopemini.sleep(500)
+            calliopemini.display.clear()
+            return True
+
+        calliopemini.display.show(calliopemini.Image.NO)
+        calliopemini.sleep(1000)
+        calliopemini.display.clear()
+        return False
+
+CMD_OK:
+  PYTHON: |
+    def send_cmd_expect_ok(cmd, timeout_ms=3000):
+        resp = send_cmd_raw(cmd, timeout_ms)
+        return resp == "OK"
+
+CMD_STRING:
+  PYTHON: |
+    def send_cmd_expect_string(cmd, timeout_ms=3000, strip_prefix=None):
+        resp = send_cmd_raw(cmd, timeout_ms)
+
+        if not resp or resp.startswith("ERROR"):
+            return None
+
+        if strip_prefix and resp.startswith(strip_prefix):
+            resp = resp[len(strip_prefix):].strip()
+
+        return resp
+
+CMD_INT:
+  PYTHON: |
+    def send_cmd_expect_int(cmd, timeout_ms=3000):
+        resp = send_cmd_raw(cmd, timeout_ms)
+
+        if not resp or resp.startswith("ERROR"):
+            return None
+
+        try:
+            return int(resp)
+        except:
+            return None
+
+CMD_LIST:
+  PYTHON: |
+    def send_cmd_expect_list(cmd, timeout_ms=3000):
+        resp = send_cmd_raw(cmd, timeout_ms)
+        return extract_list_from_response(resp)
+    
+    def extract_list_from_response(response):
+        if not response:
+            return []
+    
+        start = response.find("[")
+        end = response.find("]", start)
+        if start == -1 or end == -1:
+            return []
+        inner = response[start + 1:end].strip()
+        if not inner:
+            return []
+        parts = [p.strip() for p in inner.split(",") if p.strip() != ""]
+        if '"' in inner:
+            return [x.strip().strip('"') for x in parts]
+        try:
+            return [int(x) for x in parts]
+        except:
+            try:
+                return [float(x) for x in parts]
+            except:
+                return []

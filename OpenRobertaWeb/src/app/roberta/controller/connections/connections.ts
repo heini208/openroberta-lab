@@ -7,7 +7,8 @@ import * as MSG from 'message';
 import * as GUISTATE from 'guiState.model';
 import * as ROBOT_C from 'robot.controller';
 import { DAPLink, WebUSB } from 'dapjs';
-// @ts-ignore
+import { CalliopeDAPWrapper } from 'calliopeDapWrapper';
+import { CalliopePartialFlashing } from 'calliopePartialFlashing';// @ts-ignore
 import * as Blockly from 'blockly';
 import * as THYMIO_M from 'thymio';
 import * as PROG_C from 'program.controller';
@@ -1255,6 +1256,69 @@ class Calliope extends AutoConnection {
     }
 }
 
+class CalliopeV3PartialFlashingConnection extends AutoConnection {
+    private flashing: boolean = false;
+    private connection: CalliopeDAPWrapper;
+
+    override async connect(vendors: string, generatedCode: string): Promise<any> {
+        if (this.flashing) {
+            return 'flashing';
+        }
+
+        try {
+            if (this.device === undefined) {
+                this.device = await navigator.usb.requestDevice({
+                    filters: this.deviceFilters(vendors),
+                });
+            }
+
+            if (!this.connection) {
+                this.connection = new CalliopeDAPWrapper(this.device);
+            }
+
+            await this.connection.forceReconnectAsync();
+            return await this.upload(generatedCode);
+        } catch (e) {
+            this.removeDevice();
+            this.connection = undefined;
+
+            if (e.message && e.message.indexOf('selected') === -1) {
+                MSG.displayInformation({ rc: 'error' }, null, e.message, GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
+            }
+
+            return 'error';
+        }
+    }
+
+    override async upload(generatedCode: string): Promise<any> {
+        this.flashing = true;
+
+        try {
+            const flashing = new CalliopePartialFlashing(this.connection);
+            await flashing.flashAsync(generatedCode, this.setTransferProgress);
+        } catch (e) {
+            this.removeDevice();
+            this.connection = undefined;
+
+            if (e.message && e.message.indexOf('disconnected') !== -1) {
+                return 'disconnected';
+            }
+
+            MSG.displayInformation({ rc: 'error' }, null, e.message, GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
+            return 'error';
+        } finally {
+            this.flashing = false;
+        }
+
+        return 'done';
+    }
+
+    override removeDevice() {
+        super.removeDevice();
+        this.connection = undefined;
+    }
+}
+
 //ARDU
 export class Bob3Connection extends AgentOrTokenConnection {}
 
@@ -1872,9 +1936,7 @@ export class MicrobitConnection extends AutoConnection {}
 
 export class Microbitv2Connection extends AutoConnection {}
 
-export class Calliopev3Connection extends AutoConnection {
-    // TODO CalliopeV3: partial flashing when available
-}
+export class Calliopev3Connection extends CalliopeV3PartialFlashingConnection {}
 
 //Nao
 export class NaoConnection extends TokenConnection {}

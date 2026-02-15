@@ -88,4 +88,5 @@ public abstract class MbedV2ValidatorAndCollectorVisitor extends MbedValidatorAn
         usedHardwareBuilder.addUsedActor(new UsedActor("", SC.MUSIC));
         return null;
     }
+
 }

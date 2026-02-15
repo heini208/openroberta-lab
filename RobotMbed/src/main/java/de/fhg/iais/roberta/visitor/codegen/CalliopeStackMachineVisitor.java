@@ -2,6 +2,8 @@ package de.fhg.iais.roberta.visitor.codegen;
 
 import java.util.List;
 
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import org.json.JSONObject;
 
 import de.fhg.iais.roberta.bean.NNBean;
@@ -24,10 +26,16 @@ import de.fhg.iais.roberta.syntax.action.mbed.MotionKitDualSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.MotionKitSingleSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
@@ -36,8 +44,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
 import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.visitor.ICalliopeVisitor;
@@ -230,4 +236,96 @@ public class CalliopeStackMachineVisitor extends MbedV2StackMachineVisitor imple
     public Void visitMotionKitDualSetAction(MotionKitDualSetAction motionKitDualSetAction) {
         return null;
     }
+
+    @Override
+    public Void visitSimulationJob(SimulationJob sensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitIBMJob(IBMJob job) {
+        return null;
+    }
+
+
+    @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
+        return null;
+    }
+
+    @Override
+    public Void visitCreateCircuit(CreateCircuit createCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureQubit(MeasureQubit measure) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
+        return null;
+    }
+
+    @Override
+    public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitResetCircuit(ResetCircuit resetCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitRotationGate(RotationGate rotationGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
+        return null;
+    }
+
 }
