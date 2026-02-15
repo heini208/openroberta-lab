@@ -5,7 +5,6 @@
         <block type="robConf_motor"/>
         <block type="robConf_servo"/>
         <block type="robConf_ledbar"/>
-        <block type="robConf_fourdigitdisplay"/>
         <block type="robConf_digitalin"/>
         <block type="robConf_analogin"/>
         <block type='robConf_callibot2' intask='true'>
