@@ -61,6 +61,7 @@ import de.fhg.iais.roberta.visitor.ICalliopeVisitor;
 public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICalliopeVisitor<Void> {
     private static final Map<String, String> PIN_MAP = new HashMap<>(); // TODO better?
     private static final Map<String, String> CALLIBOT_TO_PIN_MAP = new HashMap<>();
+    private final ConfigurationAst configurationAst;
 
     static {
         PIN_MAP.put("0", "pin0");
@@ -110,6 +111,27 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         ConfigurationAst robotConfiguration,
         ClassToInstanceMap<IProjectBean> beans) {
         super(programPhrases, robotConfiguration, "calliopemini", beans);
+        this.configurationAst = robotConfiguration;
+    }
+
+    protected void collectVariablesForFunctionGlobals() {
+        super.collectVariablesForFunctionGlobals();
+    }
+
+    @Override
+    protected void visitorGenerateGlobalVariables() {
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
+            ConfigurationComponent wifiModule = getWifiOrQiskitModule();
+            if (wifiModule != null) {
+                nlIndent();
+                this.src.add("_SSID = \"", wifiModule.getOptProperty("SSID"),"\"").nlI();
+                this.src.add("_WIFI_PASSWORD = \"", wifiModule.getOptProperty("PASSWORD"),"\"").nlI();
+                this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
+                this.src.add("_WIFI_PORT = \"", wifiModule.getOptProperty("PORT"),"\"").nlI();
+                this.src.add("_IBMTOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
+            }
+        }
+            super.visitorGenerateGlobalVariables();
     }
 
     @Override
@@ -128,6 +150,9 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
             nlIndent();
             this.src.add(this.firmware, ".", PIN_MAP.get("C17"), ".set_analog_period(20)");
             nlIndent();
+        }
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) ) {
+            //this.src.add("configureIBMToken(\"", usedConfigurationBlock.getOptProperty("TOKEN"),"\");").nlI();
         }
     }
 
@@ -760,4 +785,12 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         return null;
     }
 
+    private ConfigurationComponent getWifiOrQiskitModule() {
+        for ( ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values() ) {
+            if ( component.componentType.equals(SC.QISKIT) ) {
+                return component;
+            }
+        }
+        return null;
+    }
 }
