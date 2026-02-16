@@ -147,3 +147,5 @@ GET_ROTATION:
             if factor != 0:
                 pitch = math.atan(-x / (factor))            
                 return math.floor((360*pitch)/(2*math.pi))
+    
+

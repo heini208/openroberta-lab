@@ -50,22 +50,30 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     }
 
     @Override
-    public Void visitSimulationJob(SimulationJob sensor) {
+    public Void visitSimulationJob(SimulationJob simulationJob) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
+        usedHardwareBuilder.addUsedActor(new UsedActor(simulationJob.getUserDefinedPort(), SC.QISKIT_SIM));
         return null;
     }
 
     @Override
-    public Void visitIBMJob(IBMJob job) {
+    public Void visitIBMJob(IBMJob ibmjob) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
+        usedHardwareBuilder.addUsedActor(new UsedActor(ibmjob.getUserDefinedPort(), SC.QISKIT));
         return null;
     }
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
+        usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobResult.getUserDefinedPort(), SC.QISKIT));
         return null;
     }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
+        usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobStatus.getUserDefinedPort(), SC.QISKIT));
         return null;
     }
 }
