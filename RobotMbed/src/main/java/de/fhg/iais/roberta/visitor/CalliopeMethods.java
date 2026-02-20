@@ -9,5 +9,8 @@ public enum CalliopeMethods {
     SET_MOTOR,
     SERVO_GET_ANGLE,
     RECEIVE_MESSAGE,
-    GET_ROTATION
+    GET_ROTATION,
+    SETUP_WIFI,
+    SEND_AND_WAIT,
+    SIMULATE_QBIT_MEASURE,
 }

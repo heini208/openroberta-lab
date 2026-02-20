@@ -147,5 +147,83 @@ GET_ROTATION:
             if factor != 0:
                 pitch = math.atan(-x / (factor))            
                 return math.floor((360*pitch)/(2*math.pi))
+
+SETUP_WIFI:
+  PYTHON: |
+    def setup_wifi():
+        global _WIFI_CONNECTED, _SETUP_COMPLETE
+        if _SETUP_COMPLETE:
+            return
+        calliopemini.uart.init(baudrate=115200, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
+        calliopemini.sleep(500)
     
+        def send_at(cmd):
+            calliopemini.uart.write(cmd + "\r\n")
+    
+        def wait_response(t1, t2, timeout):
+            buf = ""
+            start = calliopemini.running_time()
+            while (calliopemini.running_time() - start) < timeout:
+                if calliopemini.uart.any():
+                    try:
+                        buf += calliopemini.uart.read().decode('utf-8', 'ignore')
+                    except:
+                        pass
+                if t1 in buf:
+                    return 1
+                if t2 in buf:
+                    return 2
+                calliopemini.sleep(100)
+            return 0
+    
+        calliopemini.sleep(200)
+        while calliopemini.uart.any():
+            calliopemini.uart.read()
+    
+        calliopemini.display.show(".")
+        send_at("AT")
+        if wait_response("OK", "ERROR", 1000) == 0:
+            calliopemini.display.show("X")
+            calliopemini.sleep(2000)
+            _SETUP_COMPLETE = True
+            return
+    
+        send_at("AT+CWMODE=1")
+        wait_response("OK", "ERROR", 1000)
+    
+        calliopemini.display.show("..")
+        send_at("AT+CWJAP=\"" + _SSID + "\",\"" + _WIFI_PASSWORD + "\"")
+        result = wait_response("WIFI GOT IP", "ERROR", 20000)
+    
+        if result == 1:
+            _WIFI_CONNECTED = True
+            calliopemini.display.show(calliopemini.Image.YES)
+        else:
+            calliopemini.display.show(calliopemini.Image.NO)
+    
+        calliopemini.sleep(1000)
+        calliopemini.display.clear()
+        _SETUP_COMPLETE = True
+
+SEND_AND_WAIT:
+  PYTHON: |
+    def send_and_wait(cmd, timeout=2000):
+        calliopemini.uart.write(cmd + "\r\n")
+        buf = ""
+        start = calliopemini.running_time()
+        while (calliopemini.running_time() - start) < timeout:
+            if calliopemini.uart.any():
+                try:
+                    buf += calliopemini.uart.read().decode('utf-8', 'ignore')
+                except:
+                    pass
+            calliopemini.sleep(50)
+        return buf
+
+SIMULATE_QBIT_MEASURE:
+  PYTHON: |
+    def simulate_qbit_measure(num_qbits):
+        cmd = "SIMMEASURE " + str(num_qbits)
+        response = send_and_wait(cmd, 2000)
+        return response
 

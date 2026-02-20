@@ -56,6 +56,9 @@ public class Util {
     private static final Pattern HEX_VALUE_PATTERN = Pattern.compile("^#[0-9a-fA-F]+$");
     private static final Pattern UNSAFE_CHAR_PATTERN = Pattern.compile("^.*[;,\n\t\r].*$", Pattern.MULTILINE);
     private static final String INVALID = "invalid";
+    private static final Pattern WIFI_SSID_PATTERN = Pattern.compile("^[\\w\\s!@#$%^&*()\\-+=\\[\\]{}|;:,.<>?/~`'\"]+$");
+    private static final Pattern IP_ADDRESS_PATTERN = Pattern.compile("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
+
     /**
      * YAML parser. NOT thread-safe!
      */
@@ -699,7 +702,26 @@ public class Util {
         for ( Map.Entry<String, String> pair : componentProperties.entrySet() ) {
             String key = pair.getKey();
             String value = pair.getValue();
-            boolean isValid = key.equals("NAO_FILENAME") ? FILENAME_PATTERN.matcher(value).matches() : CONFIG_NAME_PATTERN.matcher(value).matches() || NUMBER_PATTERN.matcher(value).matches() || HEX_VALUE_PATTERN.matcher(value).matches();
+
+            // Check if this is a WiFi-related property
+            boolean isWifiProperty = key.contains("WIFI") || key.contains("SSID") ||
+                    key.contains("PASSWORD") || key.equals("SERVER_IP") ||
+                    key.equals("SERVER_PORT") || key.contains("IP");
+
+            boolean isValid;
+            if (key.equals("NAO_FILENAME")) {
+                isValid = FILENAME_PATTERN.matcher(value).matches();
+            } else if (isWifiProperty) {
+                // For WiFi properties, allow SSID pattern or IP pattern
+                isValid = WIFI_SSID_PATTERN.matcher(value).matches() ||
+                        IP_ADDRESS_PATTERN.matcher(value).matches() ||
+                        NUMBER_PATTERN.matcher(value).matches();
+            } else {
+                isValid = CONFIG_NAME_PATTERN.matcher(value).matches() ||
+                        NUMBER_PATTERN.matcher(value).matches() ||
+                        HEX_VALUE_PATTERN.matcher(value).matches();
+            }
+
             if ( !isValid ) {
                 try {
                     pair.setValue(INVALID);
@@ -728,7 +750,10 @@ public class Util {
      * @return the original value or if NUM_CONST, "0", otherwise "invalid" if the value does not match a pattern.
      */
     public static String sanitizeProgramProperty(String value, String blockName) {
-        boolean isValid = PROGRAM_NAME_PATTERN.matcher(value).matches() || NUMBER_PATTERN.matcher(value).matches();
+        boolean isValid = PROGRAM_NAME_PATTERN.matcher(value).matches()
+                || NUMBER_PATTERN.matcher(value).matches()
+                || WIFI_SSID_PATTERN.matcher(value).matches()  // Add this
+                || IP_ADDRESS_PATTERN.matcher(value).matches(); // Add this
         if ( !isValid ) {
             value = blockName.equals("NUM_CONST") ? "0" : INVALID;
         }
