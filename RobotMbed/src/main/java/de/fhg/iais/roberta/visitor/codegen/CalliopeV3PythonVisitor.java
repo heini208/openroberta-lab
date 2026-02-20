@@ -129,6 +129,8 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                 this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
                 this.src.add("_WIFI_PORT = \"", wifiModule.getOptProperty("PORT"),"\"").nlI();
                 this.src.add("_IBMTOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
+                this.src.add("_WIFI_CONNECTED = False").nlI();
+                this.src.add("_SETUP_COMPLETE = False").nlI();
             }
         }
             super.visitorGenerateGlobalVariables();
@@ -151,8 +153,8 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
             this.src.add(this.firmware, ".", PIN_MAP.get("C17"), ".set_analog_period(20)");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) ) {
-            //this.src.add("configureIBMToken(\"", usedConfigurationBlock.getOptProperty("TOKEN"),"\");").nlI();
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
+            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_WIFI), "()");
         }
     }
 
@@ -763,13 +765,16 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     @Override
     public Void visitSimulationJob(SimulationJob sensor) {
-        this.src.add("TESTING");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SIMULATE_QBIT_MEASURE), "(");
+        sensor.qbits.accept(this);
+        this.src.add(")");
         return null;
     }
 
     @Override
     public Void visitIBMJob(IBMJob job) {
         this.src.add("TESTING_IBM1");
+
         return null;
     }
 

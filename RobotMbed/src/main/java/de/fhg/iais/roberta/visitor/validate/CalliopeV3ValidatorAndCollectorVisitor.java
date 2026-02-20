@@ -51,13 +51,18 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
 
     @Override
     public Void visitSimulationJob(SimulationJob simulationJob) {
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SIMULATE_QBIT_MEASURE);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
-        usedHardwareBuilder.addUsedActor(new UsedActor(simulationJob.getUserDefinedPort(), SC.QISKIT_SIM));
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.QISKIT, SC.QISKIT));
         return null;
     }
 
     @Override
     public Void visitIBMJob(IBMJob ibmjob) {
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmjob.getUserDefinedPort(), SC.QISKIT));
         return null;
@@ -65,6 +70,8 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobResult.getUserDefinedPort(), SC.QISKIT));
         return null;
@@ -72,6 +79,8 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobStatus.getUserDefinedPort(), SC.QISKIT));
         return null;
