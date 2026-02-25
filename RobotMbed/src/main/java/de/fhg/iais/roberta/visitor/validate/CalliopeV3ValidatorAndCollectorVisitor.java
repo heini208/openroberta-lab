@@ -52,6 +52,9 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitSimulationJob(SimulationJob simulationJob) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.HTTP_GET);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.PARSE_LIST_RESPONSE);
+
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SIMULATE_QBIT_MEASURE);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
@@ -62,6 +65,8 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitIBMJob(IBMJob ibmjob) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.HTTP_GET);
+
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmjob.getUserDefinedPort(), SC.QISKIT));
@@ -71,6 +76,10 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.HTTP_GET);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.PARSE_LIST_RESPONSE);
+
+
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobResult.getUserDefinedPort(), SC.QISKIT));
@@ -80,6 +89,8 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.HTTP_GET);
+
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobStatus.getUserDefinedPort(), SC.QISKIT));
