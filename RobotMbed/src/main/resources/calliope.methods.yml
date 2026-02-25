@@ -208,6 +208,7 @@ SETUP_WIFI:
 SEND_AND_WAIT:
   PYTHON: |
     def send_and_wait(cmd, timeout=2000):
+        """Send AT command and wait for response"""
         calliopemini.uart.write(cmd + "\r\n")
         buf = ""
         start = calliopemini.running_time()
@@ -220,10 +221,65 @@ SEND_AND_WAIT:
             calliopemini.sleep(50)
         return buf
 
+PARSE_LIST_RESPONSE:
+  PYTHON: |
+    def parse_list_from_response(response, prefix="Response:"):
+        marker = response.find(prefix + '[')
+        if marker > -1:
+            start = marker + len(prefix) + 1
+            end = response.find(']', start)
+            if end > -1:
+                list_str = response[start:end]
+                result = []
+                for num in list_str.split(','):
+                    if num.strip():
+                        result.append(int(num.strip()))
+                return result
+        return None
+
+HTTP_GET:
+  PYTHON: |
+    def http_get(path):
+        """Perform HTTP GET request and return raw response"""
+        if not _WIFI_CONNECTED:
+            return "NC"
+        send_and_wait("AT+CIPCLOSE", 500)
+        connect_resp = send_and_wait("AT+CIPSTART=\"TCP\",\"" + _WIFI_IP + "\"," + _WIFI_PORT, 5000)
+        if "ERROR" in connect_resp:
+            return "ERR"
+        # Build and send HTTP request
+        req = "GET " + path + " HTTP/1.1\r\nHost: " + _WIFI_IP + "\r\n\r\n"
+        send_and_wait("AT+CIPSEND=" + str(len(req)), 2000)
+        calliopemini.sleep(300)
+        resp = send_and_wait(req, 5000)
+        send_and_wait("AT+CIPCLOSE", 500)
+    
+        return resp
+
+    def http_get_clean(path):
+        """Perform HTTP GET and return cleaned response data"""
+        raw_response = http_get(path)
+        return extract_ipd_data(raw_response)
+    
+    def extract_ipd_data(response):
+        """Extract actual data from ESP8285 +IPD response"""
+        ipd_marker = response.find('+IPD,')
+        if ipd_marker > -1:
+            colon_pos = response.find(':', ipd_marker)
+            if colon_pos > -1:
+                return response[colon_pos + 1:]
+        return response
+
 SIMULATE_QBIT_MEASURE:
   PYTHON: |
     def simulate_qbit_measure(num_qbits):
-        cmd = "SIMMEASURE " + str(num_qbits)
-        response = send_and_wait(cmd, 2000)
-        return response
-
+        calliopemini.display.show("...")
+        # Get response from server
+        response = http_get_clean("/measure?qbits=" + str(num_qbits))
+        pattern_list = parse_list_from_response(response, "Response:")
+        if pattern_list:
+            calliopemini.display.show(calliopemini.Image.YES)
+            calliopemini.sleep(500)
+            calliopemini.display.clear()
+            return pattern_list
+        return []

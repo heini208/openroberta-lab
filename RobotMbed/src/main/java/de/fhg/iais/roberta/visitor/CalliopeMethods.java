@@ -13,4 +13,6 @@ public enum CalliopeMethods {
     SETUP_WIFI,
     SEND_AND_WAIT,
     SIMULATE_QBIT_MEASURE,
+    HTTP_GET,
+    PARSE_LIST_RESPONSE,
 }
