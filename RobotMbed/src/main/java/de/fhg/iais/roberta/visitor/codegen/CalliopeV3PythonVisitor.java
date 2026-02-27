@@ -129,8 +129,8 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                 this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
                 this.src.add("_WIFI_PORT = \"", wifiModule.getOptProperty("PORT"),"\"").nlI();
                 this.src.add("_IBMTOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
-                this.src.add("_WIFI_CONNECTED = False").nlI();
-                this.src.add("_SETUP_COMPLETE = False").nlI();
+                this.src.add("_UART_BAUD = 115200").nlI();
+                this.src.add("_UART = calliopemini.uart").nlI();
             }
         }
             super.visitorGenerateGlobalVariables();
@@ -154,7 +154,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
             nlIndent();
         }
         if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
-            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_WIFI), "()");
+            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_WIFI), "(_SSID, _WIFI_PASSWORD)");
         }
     }
 
