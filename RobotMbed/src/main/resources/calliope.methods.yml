@@ -150,136 +150,115 @@ GET_ROTATION:
 
 SETUP_WIFI:
   PYTHON: |
-    def setup_wifi():
-        global _WIFI_CONNECTED, _SETUP_COMPLETE
-        if _SETUP_COMPLETE:
-            return
-        calliopemini.uart.init(baudrate=115200, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
+    def wifi_connect(ssid, password):
+        init_uart()
+        steps = [("AT", 250), ("ATE0", 250), ("AT+RST", 1600), ("AT+CWMODE_CUR=1", 250),
+    ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 6500), ("AT+CIFSR", 400)]
+        for i, (cmd, delay) in enumerate(steps):
+            calliopemini.display.show(len(steps) - i - 1)
+            ok, _ = at_cmd(cmd, timeout_ms=delay, expect_ok=True)
+            if not ok:
+              calliopemini.display.show(calliopemini.Image.NO)
+              return False
+        
+        calliopemini.display.show(calliopemini.Image.YES)
         calliopemini.sleep(500)
-    
-        def send_at(cmd):
-            calliopemini.uart.write(cmd + "\r\n")
-    
-        def wait_response(t1, t2, timeout):
-            buf = ""
-            start = calliopemini.running_time()
-            while (calliopemini.running_time() - start) < timeout:
-                if calliopemini.uart.any():
-                    try:
-                        buf += calliopemini.uart.read().decode('utf-8', 'ignore')
-                    except:
-                        pass
-                if t1 in buf:
-                    return 1
-                if t2 in buf:
-                    return 2
-                calliopemini.sleep(100)
-            return 0
-    
-        calliopemini.sleep(200)
-        while calliopemini.uart.any():
-            calliopemini.uart.read()
-    
-        calliopemini.display.show(".")
-        send_at("AT")
-        if wait_response("OK", "ERROR", 1000) == 0:
-            calliopemini.display.show("X")
-            calliopemini.sleep(2000)
-            _SETUP_COMPLETE = True
-            return
-    
-        send_at("AT+CWMODE=1")
-        wait_response("OK", "ERROR", 1000)
-    
-        calliopemini.display.show("..")
-        send_at("AT+CWJAP=\"" + _SSID + "\",\"" + _WIFI_PASSWORD + "\"")
-        result = wait_response("WIFI GOT IP", "ERROR", 20000)
-    
-        if result == 1:
-            _WIFI_CONNECTED = True
-            calliopemini.display.show(calliopemini.Image.YES)
-        else:
-            calliopemini.display.show(calliopemini.Image.NO)
-    
-        calliopemini.sleep(1000)
         calliopemini.display.clear()
-        _SETUP_COMPLETE = True
+        return True
+    
+    def init_uart():
+        _UART.init(baudrate=_UART_BAUD, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
+
+    def at_cmd(cmd, expect_ok=True, timeout_ms=1200):
+        _UART.write((cmd + "\r\n").encode("utf-8"))
+        resp = read_until_idle_adaptive(timeout_ms=timeout_ms)
+        if expect_ok and "OK" not in resp:
+            return False, resp
+        return True, resp
+
+    def at_cmd_resp(cmd, timeout_ms=1200):
+        _UART.write((cmd + "\r\n").encode("utf-8"))
+        return read_until_idle_adaptive(timeout_ms=timeout_ms)
+    
+    def read_until_idle_adaptive(timeout_ms=3000, min_idle_ms=80, factor=4):
+        start = calliopemini.running_time()
+        last_rx = None
+        normal_gap = None
+        buf = ""
+
+        while calliopemini.running_time() - start < timeout_ms:
+            if _UART.any():
+                chunk = _UART.read()
+                now = calliopemini.running_time()
+    
+                if isinstance(chunk, bytes):
+                    buf += safe_decode(chunk)
+                else:
+                    buf += str(chunk)
+    
+                if last_rx is not None:
+                    gap = now - last_rx
+                    if normal_gap is None:
+                        normal_gap = gap
+                    else:
+                        normal_gap = (normal_gap * 3 + gap) // 4
+                last_rx = now
+            else:
+                if buf and last_rx is not None and normal_gap is not None:
+                    idle = calliopemini.running_time() - last_rx
+                    adaptive_idle = max(min_idle_ms, normal_gap * factor)
+                    if idle > adaptive_idle:
+                        break
+                calliopemini.sleep(20)
+    
+        return buf
+    
+    def safe_decode(chunk):
+        try:
+            return chunk.decode("utf-8")
+        except Exception:
+            return "".join(chr(b) for b in chunk)
 
 SEND_AND_WAIT:
   PYTHON: |
-    def send_and_wait(cmd, timeout=2000):
-        """Send AT command and wait for response"""
-        calliopemini.uart.write(cmd + "\r\n")
-        buf = ""
-        start = calliopemini.running_time()
-        while (calliopemini.running_time() - start) < timeout:
-            if calliopemini.uart.any():
-                try:
-                    buf += calliopemini.uart.read().decode('utf-8', 'ignore')
-                except:
-                    pass
-            calliopemini.sleep(50)
-        return buf
+    def send_tcp_command(host, port, payload, timeout_ms=2000):
+        resp = at_cmd_resp('AT+CIPSTART="TCP","{0}",{1}'.format(host, port), timeout_ms=1500)
+        if "ERROR" in resp or resp == "":
+            return False, resp
+        payload_line = payload if payload.endswith("\n") else payload + "\n"
+        send_len = len(payload_line)
+        resp = at_cmd_resp("AT+CIPSEND={0}".format(send_len), timeout_ms=600)
+    
+        if ">" not in resp:
+            more = read_until_idle_adaptive(timeout_ms=600)
+            resp += more
+        if ">" not in resp:
+            at_cmd("AT+CIPCLOSE", timeout_ms=300, expect_ok=False)
+            return False, resp
+    
+        _UART.write(payload_line.encode("utf-8"))
+    
+        server_resp = read_until_idle_adaptive(timeout_ms=timeout_ms)
+    
+        at_cmd("AT+CIPCLOSE", timeout_ms=300, expect_ok=False)
+        return True, server_resp
 
 PARSE_LIST_RESPONSE:
   PYTHON: |
-    def parse_list_from_response(response, prefix="Response:"):
-        marker = response.find(prefix + '[')
-        if marker > -1:
-            start = marker + len(prefix) + 1
-            end = response.find(']', start)
-            if end > -1:
-                list_str = response[start:end]
-                result = []
-                for num in list_str.split(','):
-                    if num.strip():
-                        result.append(int(num.strip()))
-                return result
-        return None
-
-HTTP_GET:
-  PYTHON: |
-    def http_get(path):
-        """Perform HTTP GET request and return raw response"""
-        if not _WIFI_CONNECTED:
-            return "NC"
-        send_and_wait("AT+CIPCLOSE", 500)
-        connect_resp = send_and_wait("AT+CIPSTART=\"TCP\",\"" + _WIFI_IP + "\"," + _WIFI_PORT, 5000)
-        if "ERROR" in connect_resp:
-            return "ERR"
-        # Build and send HTTP request
-        req = "GET " + path + " HTTP/1.1\r\nHost: " + _WIFI_IP + "\r\n\r\n"
-        send_and_wait("AT+CIPSEND=" + str(len(req)), 2000)
-        calliopemini.sleep(300)
-        resp = send_and_wait(req, 5000)
-        send_and_wait("AT+CIPCLOSE", 500)
-    
-        return resp
-
-    def http_get_clean(path):
-        """Perform HTTP GET and return cleaned response data"""
-        raw_response = http_get(path)
-        return extract_ipd_data(raw_response)
-    
-    def extract_ipd_data(response):
-        """Extract actual data from ESP8285 +IPD response"""
-        ipd_marker = response.find('+IPD,')
-        if ipd_marker > -1:
-            colon_pos = response.find(':', ipd_marker)
-            if colon_pos > -1:
-                return response[colon_pos + 1:]
-        return response
+    def extract_list_from_response(response):
+        start = response.find("[")
+        end = response.find("]", start)
+        if start != -1 and end != -1:
+            inner = response[start + 1:end].strip()
+            if inner == "":
+                return []
+            return [int(x) for x in inner.split(",")]
 
 SIMULATE_QBIT_MEASURE:
   PYTHON: |
-    def simulate_qbit_measure(num_qbits):
-        calliopemini.display.show("...")
-        # Get response from server
-        response = http_get_clean("/measure?qbits=" + str(num_qbits))
-        pattern_list = parse_list_from_response(response, "Response:")
-        if pattern_list:
-            calliopemini.display.show(calliopemini.Image.YES)
-            calliopemini.sleep(500)
-            calliopemini.display.clear()
-            return pattern_list
-        return []
+    def simulate_qbit_measure(qbits=1):
+        cmd = "MEASURE_SIM {0}".format(qbits)
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=2500)
+        if not ok:
+            return None
+        return extract_list_from_response(resp)
