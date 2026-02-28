@@ -128,7 +128,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                 this.src.add("_WIFI_PASSWORD = \"", wifiModule.getOptProperty("PASSWORD"),"\"").nlI();
                 this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
                 this.src.add("_WIFI_PORT = \"", wifiModule.getOptProperty("PORT"),"\"").nlI();
-                this.src.add("_IBMTOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
+                this.src.add("_IBM_TOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
                 this.src.add("_UART_BAUD = 115200").nlI();
                 this.src.add("_UART = calliopemini.uart").nlI();
             }
@@ -155,6 +155,11 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         }
         if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
             this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_WIFI), "(_SSID, _WIFI_PASSWORD)");
+            nlIndent();
+        }
+        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.IBM)){
+            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_IBM), "(_IBM_TOKEN)");
+            nlIndent();
         }
     }
 
@@ -773,20 +778,25 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     @Override
     public Void visitIBMJob(IBMJob job) {
-        this.src.add("TESTING_IBM1");
-
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.START_REAL_QBIT_JOB), "(");
+        job.qbits.accept(this);
+        this.src.add(")");
         return null;
     }
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        this.src.add("TESTING_IBM2");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.IBM_GET_JOB_RESULT), "(");
+        ibmJobResult.id.accept(this);
+        this.src.add(")");
         return null;
     }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        this.src.add("TESTING_IBM3");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.IBM_GET_JOB_STATUS), "(");
+        ibmJobStatus.id.accept(this);
+        this.src.add(")");
         return null;
     }
 

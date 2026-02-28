@@ -44,7 +44,7 @@ public interface SC {
     String SERIAL = "SERIAL";
     String WIFI = "WIFI";
     String QISKIT = "QISKIT";
-    String QISKIT_SIM = "QISKIT_SIM";
+    String IBM = "IBM";
     String ANALOG = "ANALOG";
     String DIGITAL = "DIGITAL";
     String OBSTACLE = "OBSTACLE";

@@ -64,7 +64,13 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     public Void visitIBMJob(IBMJob ibmjob) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.GET_CLEAN_RESPONSE);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.START_REAL_QBIT_JOB);
+
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
+
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmjob.getUserDefinedPort(), SC.QISKIT));
         return null;
     }
@@ -73,6 +79,10 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.PARSE_LIST_RESPONSE);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.IBM_GET_JOB_RESULT);
+
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
 
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
@@ -84,6 +94,11 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.GET_CLEAN_RESPONSE);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.IBM_GET_JOB_STATUS);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
+
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
         usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobStatus.getUserDefinedPort(), SC.QISKIT));
         return null;

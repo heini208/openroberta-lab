@@ -180,12 +180,12 @@ SETUP_WIFI:
         _UART.write((cmd + "\r\n").encode("utf-8"))
         return read_until_idle_adaptive(timeout_ms=timeout_ms)
     
-    def read_until_idle_adaptive(timeout_ms=3000, min_idle_ms=80, factor=4):
+    def read_until_idle_adaptive(timeout_ms=3000, min_idle_ms=50, factor=4):
         start = calliopemini.running_time()
         last_rx = None
         normal_gap = None
         buf = ""
-
+    
         while calliopemini.running_time() - start < timeout_ms:
             if _UART.any():
                 chunk = _UART.read()
@@ -212,7 +212,7 @@ SETUP_WIFI:
                 calliopemini.sleep(20)
     
         return buf
-    
+
     def safe_decode(chunk):
         try:
             return chunk.decode("utf-8")
@@ -237,11 +237,30 @@ SEND_AND_WAIT:
             return False, resp
     
         _UART.write(payload_line.encode("utf-8"))
-    
-        server_resp = read_until_idle_adaptive(timeout_ms=timeout_ms)
+        server_resp = read_until_keyword(timeout_ms = timeout_ms)
     
         at_cmd("AT+CIPCLOSE", timeout_ms=300, expect_ok=False)
         return True, server_resp
+    
+    def flush_uart():
+        while _UART.any():
+            _UART.read()
+    
+    def read_until_keyword(keyword = "TCPRESPONSE:", timeout_ms=30000):
+        start = calliopemini.running_time()
+        full = ""
+        while True:
+            if calliopemini.running_time() - start >= timeout_ms:
+                return full
+            flush_uart()
+            buf = read_until_idle_adaptive(timeout_ms=1000)
+            if not buf:
+              calliopemini.sleep(30)
+              continue
+            full += buf
+            if keyword in full:
+              return full
+
 
 PARSE_LIST_RESPONSE:
   PYTHON: |
@@ -254,6 +273,13 @@ PARSE_LIST_RESPONSE:
                 return []
             return [int(x) for x in inner.split(",")]
 
+GET_CLEAN_RESPONSE:
+  PYTHON: |
+    def get_clean_response(response):
+        if "TCPRESPONSE: " in response:
+            return response.split("TCPRESPONSE: ", 1)[1].strip()
+        return ""
+
 SIMULATE_QBIT_MEASURE:
   PYTHON: |
     def simulate_qbit_measure(qbits=1):
@@ -262,3 +288,53 @@ SIMULATE_QBIT_MEASURE:
         if not ok:
             return None
         return extract_list_from_response(resp)
+
+SETUP_IBM:
+  PYTHON: |
+    def init_ibm(token):
+        cmd = "CONFIGURE_IBM {}".format(token)
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=3000)
+        if ok and "OK" in resp:
+            calliopemini.display.show(calliopemini.Image.YES)
+            calliopemini.sleep(500)
+            calliopemini.display.clear()
+            return True
+        else:
+            calliopemini.display.show(calliopemini.Image.NO)
+            calliopemini.sleep(1000)
+            calliopemini.display.clear()
+            return False
+
+START_REAL_QBIT_JOB:
+  PYTHON: |
+    def start_ibm_real_job(n_qubits=3):
+        cmd = "START_REAL_JOB {}".format(n_qubits)
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
+        if not ok:
+            return None
+        resp = get_clean_response(resp)
+        if resp.startswith("JOBID:"):
+            job_id = resp[len("JOBID:"):].strip()
+            return job_id
+        else:
+            return None
+
+IBM_GET_JOB_STATUS:
+  PYTHON: |
+    def ibm_get_job_status(job_id):
+        cmd = "JOB_STATUS {}".format(job_id)
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
+        if not ok:
+            return None
+        resp = get_clean_response(resp)
+        return resp
+
+IBM_GET_JOB_RESULT:
+  PYTHON: |
+    def ibm_get_job_result(job_id):
+        cmd = "JOB_RESULT {}".format(job_id)
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
+        if not ok:
+            return None
+        resp = extract_list_from_response(resp)
+        return resp
