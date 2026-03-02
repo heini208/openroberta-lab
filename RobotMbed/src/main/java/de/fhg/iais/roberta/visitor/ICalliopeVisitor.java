@@ -33,6 +33,27 @@ import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
+
 
 /**
  * Interface to be used with the visitor pattern to traverse an AST (and generate code, e.g.).
@@ -103,4 +124,43 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
     V visitIBMJobResult(IBMJobResult ibmJobResult);
 
     V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
+
+    V visitRunCircuitSim(RunCircuitSim runCircuitSim);
+
+    V visitRunCircuitIBM(RunCircuitIBM runCircuitIBM);
+
+    V visitGetJobResultSim(GetJobResultSim getJobResultSim);
+
+    V visitCreateCircuit(CreateCircuit createCircuit);
+
+    V visitCloneCircuit(CloneCircuit cloneCircuit);
+
+    V visitMeasureQubit(MeasureQubit measure);
+
+    V visitMeasureAllQubits(MeasureAllQubits measureAll);
+
+    // Actions (do not return values)
+    V visitDeleteCircuit(DeleteCircuit deleteCircuit);
+
+    V visitResetCircuit(ResetCircuit resetCircuit);
+
+    V visitXGate(XGate xGate);
+
+    V visitHGate(HGate hGate);
+
+    V visitZGate(ZGate zGate);
+
+    V visitYGate(YGate yGate);
+
+    V visitRXGate(RXGate rxGate);
+
+    V visitRYGate(RYGate ryGate);
+
+    V visitRZGate(RZGate rzGate);
+
+    V visitCXGate(CXGate cxGate);
+
+    V visitCZGate(CZGate czGate);
+
+    V visitSwapGate(SwapGate swapGate);
 }

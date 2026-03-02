@@ -32,6 +32,26 @@ import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
 import de.fhg.iais.roberta.syntax.action.mbed.microbitV2.SoundToggleAction;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
@@ -461,6 +481,100 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
         return null;
     }
 
+    @Override
+    public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
+        return null;
+    }
+
+    @Override
+    public Void visitCreateCircuit(CreateCircuit createCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureQubit(MeasureQubit measure) {
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
+        return null;
+    }
+
+    @Override
+    public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitResetCircuit(ResetCircuit resetCircuit) {
+        return null;
+    }
+
+    @Override
+    public Void visitXGate(XGate xGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitHGate(HGate hGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitZGate(ZGate zGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitYGate(YGate yGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitRXGate(RXGate rxGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitRYGate(RYGate ryGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitRZGate(RZGate rzGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitCXGate(CXGate cxGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitCZGate(CZGate czGate) {
+        return null;
+    }
+
+    @Override
+    public Void visitSwapGate(SwapGate swapGate) {
+        return null;
+    }
 
     protected void checkForZeroSpeed(Phrase action, Expr speed) {
         if ( speed.getKind().hasName("NUM_CONST") ) {
