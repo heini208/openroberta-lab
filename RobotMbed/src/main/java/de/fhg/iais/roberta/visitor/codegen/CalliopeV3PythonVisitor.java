@@ -790,33 +790,34 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     @Override
     public Void visitSimulationJob(SimulationJob sensor) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SIMULATE_QBIT_MEASURE), "(");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"SUPERPOSITION_SIM {}\".format(");
         sensor.qbits.accept(this);
-        this.src.add(")");
+        this.src.add("), 2500)");
         return null;
     }
 
     @Override
     public Void visitIBMJob(IBMJob job) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.START_REAL_QBIT_JOB), "(");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
+                "(\"SUPERPOSITION_IBM {}\".format(");
         job.qbits.accept(this);
-        this.src.add(")");
+        this.src.add("), 30000, strip_prefix=\"JOBID:\")");
         return null;
     }
 
     @Override
     public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.IBM_GET_JOB_RESULT), "(");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"JOB_RESULT_IBM {}\".format(");
         ibmJobResult.id.accept(this);
-        this.src.add(")");
-        return null;
-    }
-
-    @Override
-    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.IBM_GET_JOB_STATUS), "(");
-        ibmJobStatus.id.accept(this);
-        this.src.add(")");
+        this.src.add("), 30000)");
         return null;
     }
 
@@ -830,116 +831,257 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
     }
 
     @Override
+    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
+                "(\"JOB_STATUS_IBM {}\".format(");
+        ibmJobStatus.id.accept(this);
+        this.src.add("), 30000)");
+        return null;
+    }
+
+    @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
-        this.src.add("test");
+        // Run circuit simulation, expect OK
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RUN_CIRCUIT_SIM\"))");
         return null;
     }
 
     @Override
     public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
-        this.src.add("test");
+        // Run IBM circuit, expect OK
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RUN_CIRCUIT_IBM {}\".format(");
+        runCircuitIBM.circuitId.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
-        this.src.add("test");
+        // Get simulated job result, list
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"JOB_RESULT_SIM {}\".format(");
+        getJobResultSim.jobId.accept(this);
+        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"CREATE_CIRCUIT\"))");
         return null;
     }
 
     @Override
     public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"CLONE_CIRCUIT {}\".format(");
+        cloneCircuit.circuitId.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitMeasureQubit(MeasureQubit measure) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"MEASURE {} {} {}\".format("); // circuit_id, qubit, clbit
+        measure.circuitId.accept(this);
+        this.src.add(", ");
+        measure.qubit.accept(this);
+        this.src.add(", ");
+        measure.classicalBit.accept(this); // new: classical bit argument
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"MEASURE_ALL {}\".format("); // include circuit ID
+        measureAll.circuitId.accept(this);  // new: send circuit ID
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"DELETE_CIRCUIT {}\".format(");
+        deleteCircuit.circuitId.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitResetCircuit(ResetCircuit resetCircuit) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RESET_CIRCUIT {}\".format(");
+        resetCircuit.circuitId.accept(this);
+        this.src.add("))");
         return null;
     }
 
+    // Gates
     @Override
     public Void visitXGate(XGate xGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"X {} {}\".format(");
+        xGate.circuitId.accept(this);
+        this.src.add(", ");
+        xGate.qubit.accept(this); // fixed: add target qubit
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitHGate(HGate hGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"H {} {}\".format(");
+        hGate.circuitId.accept(this);
+        this.src.add(", ");
+        hGate.qubit.accept(this); // fixed: add target qubit
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitZGate(ZGate zGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"Z {} {}\".format(");
+        zGate.circuitId.accept(this);
+        this.src.add(", ");
+        zGate.qubit.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitYGate(YGate yGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"Y {} {}\".format(");
+        yGate.circuitId.accept(this);
+        this.src.add(", ");
+        yGate.qubit.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitRXGate(RXGate rxGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RX {} {} {}\".format(");
+        rxGate.circuitId.accept(this);
+        this.src.add(", ");
+        rxGate.qubit.accept(this); // fixed: include qubit
+        this.src.add(", ");
+        rxGate.angle.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitRYGate(RYGate ryGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RY {} {} {}\".format(");
+        ryGate.circuitId.accept(this);
+        this.src.add(", ");
+        ryGate.qubit.accept(this);
+        this.src.add(", ");
+        ryGate.angle.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitRZGate(RZGate rzGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"RZ {} {} {}\".format(");
+        rzGate.circuitId.accept(this);
+        this.src.add(", ");
+        rzGate.qubit.accept(this);
+        this.src.add(", ");
+        rzGate.angle.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitCXGate(CXGate cxGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"CX {} {} {}\".format(");
+        cxGate.circuitId.accept(this); // add circuit ID
+        this.src.add(", ");
+        cxGate.control.accept(this);
+        this.src.add(", ");
+        cxGate.target.accept(this);
+        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitCZGate(CZGate czGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"CZ {} {} {}\".format(");
+        czGate.circuitId.accept(this);
+        this.src.add(", ");
+        czGate.control.accept(this);
+        this.src.add(", ");
+        czGate.target.accept(this);
+        this.src.add("))");
         return null;
     }
 
-    @Override
     public Void visitSwapGate(SwapGate swapGate) {
-        this.src.add("test");
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                "(\"SWAP {} {} {}\".format(");
+        swapGate.circuitId.accept(this);
+        this.src.add(", ");
+        swapGate.q1.accept(this);
+        this.src.add(", ");
+        swapGate.q2.accept(this);
+        this.src.add("))");
         return null;
     }
 }

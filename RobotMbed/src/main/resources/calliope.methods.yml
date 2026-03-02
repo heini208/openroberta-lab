@@ -260,34 +260,17 @@ SEND_AND_WAIT:
             full += buf
             if keyword in full:
               return full
-
-
-PARSE_LIST_RESPONSE:
-  PYTHON: |
-    def extract_list_from_response(response):
-        start = response.find("[")
-        end = response.find("]", start)
-        if start != -1 and end != -1:
-            inner = response[start + 1:end].strip()
-            if inner == "":
-                return []
-            return [int(x) for x in inner.split(",")]
-
-GET_CLEAN_RESPONSE:
-  PYTHON: |
+    
+    def send_cmd_raw(cmd, timeout_ms=3000):
+        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=timeout_ms)
+        if not ok or not resp:
+            return None
+        return get_clean_response(resp)
+    
     def get_clean_response(response):
         if "TCPRESPONSE: " in response:
             return response.split("TCPRESPONSE: ", 1)[1].strip()
         return ""
-
-SIMULATE_QBIT_MEASURE:
-  PYTHON: |
-    def simulate_qbit_measure(qbits=1):
-        cmd = "MEASURE_SIM {0}".format(qbits)
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=2500)
-        if not ok:
-            return None
-        return extract_list_from_response(resp)
 
 SETUP_IBM:
   PYTHON: |
@@ -305,36 +288,42 @@ SETUP_IBM:
             calliopemini.display.clear()
             return False
 
-START_REAL_QBIT_JOB:
+CMD_OK:
   PYTHON: |
-    def start_ibm_real_job(n_qubits=3):
-        cmd = "START_REAL_JOB {}".format(n_qubits)
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
-        if not ok:
-            return None
-        resp = get_clean_response(resp)
-        if resp.startswith("JOBID:"):
-            job_id = resp[len("JOBID:"):].strip()
-            return job_id
-        else:
-            return None
+    def send_cmd_expect_ok(cmd, timeout_ms=3000):
+        resp = send_cmd_raw(cmd, timeout_ms)
+        return resp == "OK"
 
-IBM_GET_JOB_STATUS:
+CMD_STRING:
   PYTHON: |
-    def ibm_get_job_status(job_id):
-        cmd = "JOB_STATUS {}".format(job_id)
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
-        if not ok:
+    def send_cmd_expect_string(cmd, timeout_ms=3000, strip_prefix=None):
+        resp = send_cmd_raw(cmd, timeout_ms)
+        if not resp or resp.startswith("ERROR"):
             return None
-        resp = get_clean_response(resp)
+        if strip_prefix and resp.startswith(strip_prefix):
+            resp = resp[len(strip_prefix):].strip()
         return resp
 
-IBM_GET_JOB_RESULT:
+CMD_INT:
   PYTHON: |
-    def ibm_get_job_result(job_id):
-        cmd = "JOB_RESULT {}".format(job_id)
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=30000)
-        if not ok:
-            return None
-        resp = extract_list_from_response(resp)
-        return resp
+    def send_cmd_expect_int(cmd, timeout_ms=3000):
+      resp = send_cmd_raw(cmd, timeout_ms)
+      try:
+        return int(resp)
+      except:
+        return None
+
+CMD_LIST:
+  PYTHON: |
+    def send_cmd_expect_list(cmd, timeout_ms=3000):
+        resp = send_cmd_raw(cmd, timeout_ms)
+        return extract_list_from_response(resp)
+    
+    def extract_list_from_response(response):
+        start = response.find("[")
+        end = response.find("]", start)
+        if start != -1 and end != -1:
+            inner = response[start + 1:end].strip()
+            if inner == "":
+                return []
+            return [int(x) for x in inner.split(",")]
