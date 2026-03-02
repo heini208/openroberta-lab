@@ -52,6 +52,26 @@ import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
 import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
+import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -806,6 +826,120 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                 return component;
             }
         }
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitCreateCircuit(CreateCircuit createCircuit) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureQubit(MeasureQubit measure) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitResetCircuit(ResetCircuit resetCircuit) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitXGate(XGate xGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitHGate(HGate hGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitZGate(ZGate zGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitYGate(YGate yGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitRXGate(RXGate rxGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitRYGate(RYGate ryGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitRZGate(RZGate rzGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitCXGate(CXGate cxGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitCZGate(CZGate czGate) {
+        this.src.add("test");
+        return null;
+    }
+
+    @Override
+    public Void visitSwapGate(SwapGate swapGate) {
+        this.src.add("test");
         return null;
     }
 }

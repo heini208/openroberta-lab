@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2026-02-16 23:09:13.444197",
+		"lastupdated": "2026-03-02 01:49:51.304170",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -723,7 +723,11 @@
 	"TOOLBOX_VISION": "Vision",
 	"TOOLBOX_CLEANING": "Cleaning",
 	"TOOLBOX_ADD_ON": "Add-ons",
-	"TOOLBOX_QISKIT": "QISKIT",
+	"TOOLBOX_QISKIT": "Qiskit",
+	"TOOLBOX_RNG": "Random Numbers",
+	"TOOLBOX_CIRCUITS": "Circuits",
+	"TOOLBOX_GATES": "Gates",
+	"TOOLBOX_JOBS": "Jobs",
 	"MENU_EDIT": "edit",
 	"MENU_ROBOT": "robot",
 	"MENU_HELP": "help",

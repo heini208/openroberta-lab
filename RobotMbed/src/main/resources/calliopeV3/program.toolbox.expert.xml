@@ -215,11 +215,295 @@
         <block type="robSensors_colourtcs3472_getSample"></block>
         <block type='robSensors_keyc_getSample'></block>
     </category>
-    <category name="TOOLBOX_QISKIT" svg="true">
-        <block type='robSensors_qiskit_start_job_simulation'/>
-        <block type='robSensors_qiskit_start_job_ibm'/>
-        <block type='robSensors_qiskit_job_status'/>
-        <block type='robSensors_qiskit_job_result'/>
+    <category name='TOOLBOX_QISKIT' svg='true'>
+
+        <category name='TOOLBOX_RNG' svg='true'>
+            <block type='robSensors_qiskit_start_job_simulation'>
+                <value name='QBITS'>
+                    <block type='math_number'>
+                        <field name='NUM'>2</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_start_job_ibm'>
+                <value name='QBITS'>
+                    <block type='math_number'>
+                        <field name='NUM'>2</field>
+                    </block>
+                </value>
+            </block>
+        </category>
+
+        <category name='TOOLBOX_CIRCUITS' svg='true'>
+            <block type='robSensors_qiskit_create_circuit'>
+                <value name='NUM_QUBITS'>
+                    <block type='math_number'>
+                        <field name='NUM'>2</field>
+                    </block>
+                </value>
+                <value name='NUM_CLBITS'>
+                    <block type='math_number'>
+                        <field name='NUM'>2</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_delete_circuit'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_reset_circuit'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_clone_circuit'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_measure'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='CBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_measure_all'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+        </category>
+
+        <category name='TOOLBOX_GATES' svg='true'>
+            <block type='robActions_qiskit_x'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_h'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_z'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_y'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_rx'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='ANGLE'>
+                    <block type='math_number'>
+                        <field name='NUM'>3.1415</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_ry'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='ANGLE'>
+                    <block type='math_number'>
+                        <field name='NUM'>3.1415</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_rz'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='QUBIT'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='ANGLE'>
+                    <block type='math_number'>
+                        <field name='NUM'>3.1415</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_cx'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='CONTROL'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='TARGET'>
+                    <block type='math_number'>
+                        <field name='NUM'>1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_cz'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='CONTROL'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='TARGET'>
+                    <block type='math_number'>
+                        <field name='NUM'>1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robActions_qiskit_swap'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+                <value name='Q1'>
+                    <block type='math_number'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='Q2'>
+                    <block type='math_number'>
+                        <field name='NUM'>1</field>
+                    </block>
+                </value>
+            </block>
+        </category>
+
+        <category name='TOOLBOX_JOBS' svg='true'>
+            <block type='robSensors_qiskit_run_sim'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_run_ibm'>
+                <value name='CIRCUIT_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>circuit1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_job_result_sim'>
+                <value name='JOB_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_job_status'>
+                <value name='ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_job_result'>
+                <value name='ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+        </category>
+
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <category name="TOOLBOX_DECISION" svg="true">
