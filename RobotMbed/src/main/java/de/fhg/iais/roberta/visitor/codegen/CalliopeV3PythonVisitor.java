@@ -846,8 +846,10 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         // Run circuit simulation, expect OK
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RUN_CIRCUIT_SIM\"))");
+                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
+                "(\"RUN_CIRCUIT_SIM {}\".format(");
+        runCircuitSim.circuitId.accept(this);
+        this.src.add("), strip_prefix=\"JOBID:\")");
         return null;
     }
 
@@ -859,7 +861,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
                 "(\"RUN_CIRCUIT_IBM {}\".format(");
         runCircuitIBM.circuitId.accept(this);
-        this.src.add("))");
+        this.src.add("), strip_prefix=\"JOBID:\")");
         return null;
     }
 
@@ -869,7 +871,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"JOB_RESULT_SIM {}\".format(");
+                "(\"GET_JOB_RESULT_SIM {}\".format(");
         getJobResultSim.jobId.accept(this);
         this.src.add("), 30000)");
         return null;
@@ -879,8 +881,14 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"CREATE_CIRCUIT\"))");
+                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
+                "(\"CREATE_CIRCUIT {} {}\".format(");
+
+        createCircuit.numQubits.accept(this);
+        this.src.add(", ");
+        createCircuit.numClbits.accept(this);
+
+        this.src.add("), strip_prefix=\"CIRCUIT_ID:\")");
         return null;
     }
 
@@ -891,7 +899,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
                 "(\"CLONE_CIRCUIT {}\".format(");
         cloneCircuit.circuitId.accept(this);
-        this.src.add("))");
+        this.src.add("), strip_prefix=\"CIRCUIT_ID:\")");
         return null;
     }
 
