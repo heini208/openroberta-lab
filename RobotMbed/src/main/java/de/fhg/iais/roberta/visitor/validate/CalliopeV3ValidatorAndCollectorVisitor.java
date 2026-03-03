@@ -108,7 +108,7 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
         setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_STRING);
         return null;
     }
 
@@ -116,7 +116,7 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
         setup_Wifi();
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_STRING);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
         return null;
     }
@@ -138,14 +138,14 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
         setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_STRING);
         return null;
     }
 
     @Override
     public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
         setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_STRING);
         return null;
     }
 
