@@ -815,7 +815,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"JOB_RESULT_IBM {}\".format(");
+                "(\"GET_JOB_SAMPLE {}\".format(");
         ibmJobResult.id.accept(this);
         this.src.add("), 30000)");
         return null;
@@ -871,7 +871,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_RESULT_SIM {}\".format(");
+                "(\"GET_JOB_SAMPLE {}\".format(");
         getJobResultSim.jobId.accept(this);
         this.src.add("), 30000)");
         return null;
