@@ -27,19 +27,8 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
-import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
@@ -121,15 +110,13 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
 
     V visitIBMJob(IBMJob job);
 
-    V visitIBMJobResult(IBMJobResult ibmJobResult);
-
     V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
 
     V visitRunCircuitSim(RunCircuitSim runCircuitSim);
 
     V visitRunCircuitIBM(RunCircuitIBM runCircuitIBM);
 
-    V visitGetJobResultSim(GetJobResultSim getJobResultSim);
+    V visitGetJobResultSample(GetJobResultSample getJobResultSample);
 
     V visitCreateCircuit(CreateCircuit createCircuit);
 

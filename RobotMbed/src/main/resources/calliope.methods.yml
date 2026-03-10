@@ -153,7 +153,7 @@ SETUP_WIFI:
     def wifi_connect(ssid, password):
         init_uart()
         steps = [("AT", 250), ("ATE0", 250), ("AT+RST", 1600), ("AT+CWMODE_CUR=1", 250),
-    ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 6500), ("AT+CIFSR", 400)]
+    ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000), ("AT+CIFSR", 400)]
         for i, (cmd, delay) in enumerate(steps):
             calliopemini.display.show(len(steps) - i - 1)
             ok, _ = at_cmd(cmd, timeout_ms=delay, expect_ok=True)

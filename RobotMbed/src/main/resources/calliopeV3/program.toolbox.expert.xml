@@ -479,7 +479,7 @@
                 </value>
             </block>
 
-            <block type='robSensors_qiskit_job_result_sim'>
+            <block type='robSensors_qiskit_job_result_sample'>
                 <value name='JOB_ID'>
                     <block type='text'>
                         <field name='TEXT'>job1</field>
@@ -488,14 +488,6 @@
             </block>
 
             <block type='robSensors_qiskit_job_status'>
-                <value name='ID'>
-                    <block type='text'>
-                        <field name='TEXT'>job1</field>
-                    </block>
-                </value>
-            </block>
-
-            <block type='robSensors_qiskit_job_result'>
                 <value name='ID'>
                     <block type='text'>
                         <field name='TEXT'>job1</field>
