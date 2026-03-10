@@ -16,8 +16,7 @@ import de.fhg.iais.roberta.syntax.action.mbed.MotionKitDualSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.MotionKitSingleSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
@@ -29,19 +28,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
-
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 
 
 /**
@@ -137,24 +123,10 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
 
     V visitResetCircuit(ResetCircuit resetCircuit);
 
-    V visitXGate(XGate xGate);
+    V visitSingleQubitGate(SingleQubitGate singleQubitGate);
 
-    V visitHGate(HGate hGate);
+    V visitRotationGate(RotationGate rotationGate);
 
-    V visitZGate(ZGate zGate);
-
-    V visitYGate(YGate yGate);
-
-    V visitRXGate(RXGate rxGate);
-
-    V visitRYGate(RYGate ryGate);
-
-    V visitRZGate(RZGate rzGate);
-
-    V visitCXGate(CXGate cxGate);
-
-    V visitCZGate(CZGate czGate);
-
-    V visitSwapGate(SwapGate swapGate);
+    V visitTwoQubitGate(TwoQubitGate twoQubitGate);
 
 }

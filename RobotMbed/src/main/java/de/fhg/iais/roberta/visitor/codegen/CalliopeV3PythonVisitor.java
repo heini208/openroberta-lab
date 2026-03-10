@@ -33,8 +33,7 @@ import de.fhg.iais.roberta.syntax.action.mbed.MotionKitDualSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.MotionKitSingleSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioReceiveAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
@@ -49,18 +48,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -963,143 +950,50 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     // Gates
     @Override
-    public Void visitXGate(XGate xGate) {
+    public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"X {} {}\".format(");
-        xGate.circuitId.accept(this);
+                "(\"");
+        this.src.add(singleQubitGate.gate);
+        this.src.add(" {} {}\".format(");
+        singleQubitGate.circuitId.accept(this);
         this.src.add(", ");
-        xGate.qubit.accept(this); // fixed: add target qubit
+        singleQubitGate.qubit.accept(this); // fixed: add target qubit
         this.src.add("))");
         return null;
     }
 
     @Override
-    public Void visitHGate(HGate hGate) {
+    public Void visitRotationGate(RotationGate rotationGate) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"H {} {}\".format(");
-        hGate.circuitId.accept(this);
+                "(\"");
+        this.src.add(rotationGate.gate);
+        this.src.add(" {} {} {}\".format(");
+        rotationGate.circuitId.accept(this);
         this.src.add(", ");
-        hGate.qubit.accept(this); // fixed: add target qubit
+        rotationGate.qubit.accept(this); // fixed: include qubit
+        this.src.add(", ");
+        rotationGate.angle.accept(this);
         this.src.add("))");
         return null;
     }
 
     @Override
-    public Void visitZGate(ZGate zGate) {
+    public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"Z {} {}\".format(");
-        zGate.circuitId.accept(this);
+                "(\"",twoQubitGate.gate," {} {} {}\".format(");
+        twoQubitGate.circuitId.accept(this); // add circuit ID
         this.src.add(", ");
-        zGate.qubit.accept(this);
+        twoQubitGate.control.accept(this);
+        this.src.add(", ");
+        twoQubitGate.target.accept(this);
         this.src.add("))");
         return null;
     }
 
-    @Override
-    public Void visitYGate(YGate yGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"Y {} {}\".format(");
-        yGate.circuitId.accept(this);
-        this.src.add(", ");
-        yGate.qubit.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    @Override
-    public Void visitRXGate(RXGate rxGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RX {} {} {}\".format(");
-        rxGate.circuitId.accept(this);
-        this.src.add(", ");
-        rxGate.qubit.accept(this); // fixed: include qubit
-        this.src.add(", ");
-        rxGate.angle.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    @Override
-    public Void visitRYGate(RYGate ryGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RY {} {} {}\".format(");
-        ryGate.circuitId.accept(this);
-        this.src.add(", ");
-        ryGate.qubit.accept(this);
-        this.src.add(", ");
-        ryGate.angle.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    @Override
-    public Void visitRZGate(RZGate rzGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RZ {} {} {}\".format(");
-        rzGate.circuitId.accept(this);
-        this.src.add(", ");
-        rzGate.qubit.accept(this);
-        this.src.add(", ");
-        rzGate.angle.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    @Override
-    public Void visitCXGate(CXGate cxGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"CX {} {} {}\".format(");
-        cxGate.circuitId.accept(this); // add circuit ID
-        this.src.add(", ");
-        cxGate.control.accept(this);
-        this.src.add(", ");
-        cxGate.target.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    @Override
-    public Void visitCZGate(CZGate czGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"CZ {} {} {}\".format(");
-        czGate.circuitId.accept(this);
-        this.src.add(", ");
-        czGate.control.accept(this);
-        this.src.add(", ");
-        czGate.target.accept(this);
-        this.src.add("))");
-        return null;
-    }
-
-    public Void visitSwapGate(SwapGate swapGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"SWAP {} {} {}\".format(");
-        swapGate.circuitId.accept(this);
-        this.src.add(", ");
-        swapGate.q1.accept(this);
-        this.src.add(", ");
-        swapGate.q2.accept(this);
-        this.src.add("))");
-        return null;
-    }
 }

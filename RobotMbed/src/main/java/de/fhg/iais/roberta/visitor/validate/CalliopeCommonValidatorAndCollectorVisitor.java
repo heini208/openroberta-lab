@@ -29,8 +29,7 @@ import de.fhg.iais.roberta.syntax.action.mbed.RadioSendAction;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioSetChannelAction;
 import de.fhg.iais.roberta.syntax.action.mbed.ServoSetAction;
 import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOffHiddenAction;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.action.mbed.microbitV2.SoundToggleAction;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
@@ -40,18 +39,6 @@ import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
 
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
@@ -538,52 +525,17 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
     }
 
     @Override
-    public Void visitXGate(XGate xGate) {
+    public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
         return null;
     }
 
     @Override
-    public Void visitHGate(HGate hGate) {
+    public Void visitRotationGate(RotationGate rotationGate) {
         return null;
     }
 
     @Override
-    public Void visitZGate(ZGate zGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitYGate(YGate yGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitRXGate(RXGate rxGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitRYGate(RYGate ryGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitRZGate(RZGate rzGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitCXGate(CXGate cxGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitCZGate(CZGate czGate) {
-        return null;
-    }
-
-    @Override
-    public Void visitSwapGate(SwapGate swapGate) {
+    public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
         return null;
     }
 

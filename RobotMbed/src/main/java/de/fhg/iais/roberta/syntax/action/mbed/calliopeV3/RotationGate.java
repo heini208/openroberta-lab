@@ -3,16 +3,20 @@ package de.fhg.iais.roberta.syntax.action.mbed.calliopeV3;
 import de.fhg.iais.roberta.syntax.action.Action;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.transformer.forClass.NepoExpr;
+import de.fhg.iais.roberta.transformer.forField.NepoField;
 import de.fhg.iais.roberta.transformer.forField.NepoValue;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.ast.BlocklyProperties;
 
 @NepoExpr(
-        name = "QISKIT_RZ",
+        name = "QISKIT_ROTATION_GATE",
         category = "ACTOR",
-        blocklyNames = {"robActions_qiskit_rz"}
+        blocklyNames = {"robActions_qiskit_rotation_gate"}
 )
-public final class RZGate extends Action {
+public final class RotationGate extends Action {
+
+    @NepoField(name = "GATE")
+    public final String gate;
 
     @NepoValue(name = "CIRCUIT_ID", type = BlocklyType.STRING)
     public final Expr circuitId;
@@ -23,8 +27,9 @@ public final class RZGate extends Action {
     @NepoValue(name = "ANGLE", type = BlocklyType.NUMBER)
     public final Expr angle;
 
-    public RZGate(BlocklyProperties properties, Expr circuitId, Expr qubit, Expr angle) {
+    public RotationGate(BlocklyProperties properties, String gate, Expr circuitId, Expr qubit, Expr angle) {
         super(properties);
+        this.gate = gate;
         this.circuitId = circuitId;
         this.qubit = qubit;
         this.angle = angle;

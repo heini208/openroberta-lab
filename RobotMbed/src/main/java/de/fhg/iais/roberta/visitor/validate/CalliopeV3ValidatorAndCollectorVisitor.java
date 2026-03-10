@@ -6,22 +6,11 @@ import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioReceiveAction;
+import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
 import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.XGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.HGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.YGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RYGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CXGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.CZGate;
-import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.SwapGate;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.CalliopeMethods;
 import de.fhg.iais.roberta.visitor.ICalliopeVisitor;
@@ -189,72 +178,24 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
 
     // Gates
     @Override
-    public Void visitXGate(XGate xGate) {
+    public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
         setup_Wifi();
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
         return null;
     }
 
     @Override
-    public Void visitHGate(HGate hGate) {
+    public Void visitRotationGate(RotationGate rotationGate) {
         setup_Wifi();
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
         return null;
     }
 
     @Override
-    public Void visitZGate(ZGate zGate) {
+    public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
         setup_Wifi();
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
         return null;
     }
 
-    @Override
-    public Void visitYGate(YGate yGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitRXGate(RXGate rxGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitRYGate(RYGate ryGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitRZGate(RZGate rzGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitCXGate(CXGate cxGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitCZGate(CZGate czGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
-
-    @Override
-    public Void visitSwapGate(SwapGate swapGate) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_OK);
-        return null;
-    }
 }
