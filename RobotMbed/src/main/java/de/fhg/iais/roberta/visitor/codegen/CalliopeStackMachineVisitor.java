@@ -31,7 +31,7 @@ import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
-import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
@@ -260,10 +260,6 @@ public class CalliopeStackMachineVisitor extends MbedV2StackMachineVisitor imple
         return null;
     }
 
-    @Override
-    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        return null;
-    }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
@@ -281,7 +277,7 @@ public class CalliopeStackMachineVisitor extends MbedV2StackMachineVisitor imple
     }
 
     @Override
-    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
         return null;
     }
 

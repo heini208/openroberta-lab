@@ -46,19 +46,8 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.MoistureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.UltrasonicSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CallibotKeysSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RadioRssiSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
-import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
@@ -810,17 +799,6 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         return null;
     }
 
-    @Override
-    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_SAMPLE {}\".format(");
-        ibmJobResult.id.accept(this);
-        this.src.add("), 30000)");
-        return null;
-    }
-
     private ConfigurationComponent getWifiOrQiskitModule() {
         for ( ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values() ) {
             if ( component.componentType.equals(SC.QISKIT) ) {
@@ -866,13 +844,12 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
     }
 
     @Override
-    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
-        // Get simulated job result, list
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_LIST),
                 "(\"GET_JOB_SAMPLE {}\".format(");
-        getJobResultSim.jobId.accept(this);
+        getJobResultSample.jobId.accept(this);
         this.src.add("), 30000)");
         return null;
     }

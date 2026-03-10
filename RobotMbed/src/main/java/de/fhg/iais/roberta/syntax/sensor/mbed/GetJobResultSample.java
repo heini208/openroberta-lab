@@ -8,16 +8,16 @@ import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.ast.BlocklyProperties;
 
 @NepoExpr(
-        name = "QISKIT_JOB_RESULT_SIM",
+        name = "QISKIT_JOB_RESULT_SAMPLE",
         category = "SENSOR",
-        blocklyNames = {"robSensors_qiskit_job_result_sim"}
+        blocklyNames = {"robSensors_qiskit_job_result_sample"}
 )
-public final class GetJobResultSim extends Sensor {
+public final class GetJobResultSample extends Sensor {
 
     @NepoValue(name = "JOB_ID", type = BlocklyType.STRING)
     public final Expr jobId;
 
-    public GetJobResultSim(BlocklyProperties properties, Expr jobId) {
+    public GetJobResultSample(BlocklyProperties properties, Expr jobId) {
         super(properties);
         this.jobId = jobId;
         setReadOnly();

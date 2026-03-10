@@ -34,7 +34,7 @@ import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.RgbLedsOnHiddenAction;
 import de.fhg.iais.roberta.syntax.action.mbed.microbitV2.SoundToggleAction;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
-import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
@@ -471,10 +471,6 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
         return null;
     }
 
-    @Override
-    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        return null;
-    }
 
     @Override
     public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
@@ -492,7 +488,7 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
     }
 
     @Override
-    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
         return null;
     }
 

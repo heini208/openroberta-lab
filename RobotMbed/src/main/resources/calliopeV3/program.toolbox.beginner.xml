@@ -45,7 +45,7 @@
         <block type='robSensors_qiskit_start_job_simulation'/>
         <block type='robSensors_qiskit_start_job_ibm'/>
         <block type='robSensors_qiskit_job_status'/>
-        <block type='robSensors_qiskit_job_result'/>
+        <block type='robSensors_qiskit_job_result_sample'/>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <block type="robControls_if"></block>

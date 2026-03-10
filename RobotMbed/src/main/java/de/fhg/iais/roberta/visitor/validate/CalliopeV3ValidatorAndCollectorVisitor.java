@@ -7,17 +7,8 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.syntax.action.mbed.RadioReceiveAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.GyroSensor;
-import de.fhg.iais.roberta.syntax.sensor.mbed.SimulationJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJob;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobResult;
-import de.fhg.iais.roberta.syntax.sensor.mbed.IBMJobStatus;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
-import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureQubit;
-import de.fhg.iais.roberta.syntax.sensor.mbed.MeasureAllQubits;
+import de.fhg.iais.roberta.syntax.sensor.mbed.*;
+import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.DeleteCircuit;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.ResetCircuit;
@@ -40,11 +31,11 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     protected final boolean isSim;
 
     public CalliopeV3ValidatorAndCollectorVisitor(
-        ConfigurationAst brickConfiguration,
-        ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders,
-        boolean isSim,
-        boolean displaySwitchUsed,
-        boolean hasBlueTooth) //
+            ConfigurationAst brickConfiguration,
+            ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders,
+            boolean isSim,
+            boolean displaySwitchUsed,
+            boolean hasBlueTooth) //
     {
         super(brickConfiguration, beanBuilders, isSim, displaySwitchUsed, hasBlueTooth);
         this.isSim = isSim;
@@ -59,7 +50,7 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
 
     @Override
     public Void visitRadioReceiveAction(RadioReceiveAction radioReceiveAction) {
-        if ( hasBlueTooth ) {
+        if (hasBlueTooth) {
             addErrorToPhrase(radioReceiveAction, "BLOCK_NOT_SUPPORTED");
         } else {
             addToPhraseIfUnsupportedInSim(radioReceiveAction, true, isSim);
@@ -82,16 +73,6 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_STRING);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
-        return null;
-    }
-
-    @Override
-    public Void visitIBMJobResult(IBMJobResult ibmJobResult) {
-        setup_Wifi();
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
-        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
-        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
-        usedHardwareBuilder.addUsedActor(new UsedActor(ibmJobResult.getUserDefinedPort(), SC.QISKIT));
         return null;
     }
 
@@ -122,13 +103,13 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     }
 
     @Override
-    public Void visitGetJobResultSim(GetJobResultSim getJobResultSim) {
+    public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
         setup_Wifi();
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
         return null;
     }
 
-    private void setup_Wifi(){
+    private void setup_Wifi() {
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_WIFI);
         usedMethodBuilder.addUsedMethod(CalliopeMethods.SEND_AND_WAIT);
         usedHardwareBuilder.addUsedActor(new UsedActor(SC.WIFI, SC.WIFI));
