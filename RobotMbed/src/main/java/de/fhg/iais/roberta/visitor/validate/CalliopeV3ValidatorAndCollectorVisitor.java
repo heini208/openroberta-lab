@@ -105,6 +105,35 @@ public class CalliopeV3ValidatorAndCollectorVisitor extends CalliopeCommonValida
     @Override
     public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
         setup_Wifi();
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
+        setup_Wifi();
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
+        setup_Wifi();
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
+        setup_Wifi();
+        usedMethodBuilder.addUsedMethod(CalliopeMethods.SETUP_IBM);
+        usedHardwareBuilder.addUsedActor(new UsedActor(SC.IBM, SC.IBM));
         usedMethodBuilder.addUsedMethod(CalliopeMethods.CMD_LIST);
         return null;
     }

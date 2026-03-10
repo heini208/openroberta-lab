@@ -487,6 +487,30 @@
                 </value>
             </block>
 
+            <block type='robSensors_qiskit_job_result_states'>
+                <value name='JOB_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_job_result_counts'>
+                <value name='JOB_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+
+            <block type='robSensors_qiskit_job_result_probabilities'>
+                <value name='JOB_ID'>
+                    <block type='text'>
+                        <field name='TEXT'>job1</field>
+                    </block>
+                </value>
+            </block>
+
             <block type='robSensors_qiskit_job_status'>
                 <value name='ID'>
                     <block type='text'>

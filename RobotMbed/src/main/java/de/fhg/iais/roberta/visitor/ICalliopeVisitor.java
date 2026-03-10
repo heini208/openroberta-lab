@@ -118,6 +118,12 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
 
     V visitGetJobResultSample(GetJobResultSample getJobResultSample);
 
+    V visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities);
+
+    V visitGetJobResultCounts(GetJobResultCounts getJobResultCounts);
+
+    V visitGetJobResultStates(GetJobResultStates getJobResultStates);
+
     V visitCreateCircuit(CreateCircuit createCircuit);
 
     V visitCloneCircuit(CloneCircuit cloneCircuit);
@@ -150,4 +156,5 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
     V visitCZGate(CZGate czGate);
 
     V visitSwapGate(SwapGate swapGate);
+
 }

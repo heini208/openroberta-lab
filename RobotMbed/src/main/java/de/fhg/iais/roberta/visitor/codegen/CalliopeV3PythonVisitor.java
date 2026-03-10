@@ -855,6 +855,39 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
     }
 
     @Override
+    public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"GET_JOB_STATES {}\".format(");
+        getJobResultStates.jobId.accept(this);
+        this.src.add("), 30000)");
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"GET_JOB_COUNTS {}\".format(");
+        getJobResultCounts.jobId.accept(this);
+        this.src.add("), 30000)");
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
+        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
+                        .getHelperMethodGenerator()
+                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
+                "(\"GET_JOB_PROBABILITIES {}\".format(");
+        getJobResultProbabilities.jobId.accept(this);
+        this.src.add("), 30000)");
+        return null;
+    }
+
+    @Override
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
