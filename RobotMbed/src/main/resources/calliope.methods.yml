@@ -326,4 +326,7 @@ CMD_LIST:
             inner = response[start + 1:end].strip()
             if inner == "":
                 return []
-            return [int(x) for x in inner.split(",")]
+            items = inner.split(",")
+            if '"' in inner:
+                return [x.strip().strip('"') for x in items]
+            return [int(x) for x in items]

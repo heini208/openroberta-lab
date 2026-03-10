@@ -1667,6 +1667,21 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     @Override
+    public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
+        return null;
+    }
+
+    @Override
+    public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
+        return null;
+    }
+
+    @Override
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
         return null;
     }
