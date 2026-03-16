@@ -152,14 +152,25 @@ SETUP_WIFI:
   PYTHON: |
     def wifi_connect(ssid, password):
         init_uart()
-        steps = [("AT", 250), ("ATE0", 250), ("AT+RST", 1600), ("AT+CWMODE_CUR=1", 250),
-    ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000), ("AT+CIFSR", 400)]
-        for i, (cmd, delay) in enumerate(steps):
-            calliopemini.display.show(len(steps) - i - 1)
-            ok, _ = at_cmd(cmd, timeout_ms=delay, expect_ok=True)
-            if not ok:
-              calliopemini.display.show(calliopemini.Image.NO)
-              return False
+
+        at_cmd("AT", timeout_ms=300)
+        flush_uart()
+        
+        ok, resp = at_cmd('AT+CWJAP_CUR?', timeout_ms=2000, expect_ok=True)
+        calliopemini.sleep(200)
+        flush_uart()
+    
+        if not (ok and ssid in resp):
+            steps = [("AT", 250), ("ATE0", 250), ("AT+RST", 1600), ("AT+CWMODE_CUR=1", 250),
+        ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000), ("AT+CIFSR", 400)]
+            for i, (cmd, delay) in enumerate(steps):
+                calliopemini.display.show(len(steps) - i - 1)
+                ok, _ = at_cmd(cmd, timeout_ms=delay, expect_ok=True)
+                if not ok:
+                  calliopemini.display.show(calliopemini.Image.NO)
+                  calliopemini.sleep(500)
+                  calliopemini.display.clear()
+                  return False
         
         calliopemini.display.show(calliopemini.Image.YES)
         calliopemini.sleep(500)
