@@ -123,7 +123,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                 this.src.add("_SSID = \"", wifiModule.getOptProperty("SSID"),"\"").nlI();
                 this.src.add("_WIFI_PASSWORD = \"", wifiModule.getOptProperty("PASSWORD"),"\"").nlI();
                 this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
-                this.src.add("_WIFI_PORT = \"", wifiModule.getOptProperty("PORT"),"\"").nlI();
+                this.src.add("_WIFI_PORT = ", wifiModule.getOptProperty("PORT")).nlI();
                 this.src.add("_IBM_TOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
                 this.src.add("_UART_BAUD = 115200").nlI();
                 this.src.add("_UART = calliopemini.uart").nlI();
