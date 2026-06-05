@@ -233,7 +233,7 @@ SETUP_WIFI:
 SEND_AND_WAIT:
   PYTHON: |
     def send_tcp_command(host, port, payload, timeout_ms=2000):
-        resp = at_cmd_resp('AT+CIPSTART="TCP","{0}",{1}'.format(host, port), timeout_ms=1500)
+        resp = at_cmd_resp('AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)), timeout_ms=1500)
         if "ERROR" in resp or resp == "":
             return False, resp
         payload_line = payload if payload.endswith("\n") else payload + "\n"
