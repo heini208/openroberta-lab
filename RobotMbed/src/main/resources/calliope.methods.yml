@@ -152,26 +152,37 @@ SETUP_WIFI:
   PYTHON: |
     def wifi_connect(ssid, password):
         init_uart()
-
-        at_cmd("AT", timeout_ms=300)
-        flush_uart()
-        
-        ok, resp = at_cmd('AT+CWJAP_CUR?', timeout_ms=2000, expect_ok=True)
-        calliopemini.sleep(200)
+    
+        at_cmd("AT", timeout_ms=300, expect_ok=False)
+        at_cmd("ATE0", timeout_ms=250, expect_ok=False)
         flush_uart()
     
-        if not (ok and ssid in resp):
-            steps = [("AT", 250), ("ATE0", 250), ("AT+RST", 1600), ("AT+CWMODE_CUR=1", 250),
-        ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000), ("AT+CIFSR", 400)]
-            for i, (cmd, delay) in enumerate(steps):
-                calliopemini.display.show(len(steps) - i - 1)
-                ok, _ = at_cmd(cmd, timeout_ms=delay, expect_ok=True)
-                if not ok:
-                  calliopemini.display.show(calliopemini.Image.NO)
-                  calliopemini.sleep(500)
-                  calliopemini.display.clear()
-                  return False
-        
+        ok, resp = at_cmd("AT+CWJAP_CUR?", timeout_ms=2000, expect_ok=True)
+        flush_uart()
+    
+        if ok and ssid in resp:
+            calliopemini.display.show(calliopemini.Image.YES)
+            calliopemini.sleep(500)
+            calliopemini.display.clear()
+            return True
+    
+        steps = [
+            ("AT+CWMODE_CUR=1", 500, True),
+            ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000, True),
+            ("AT+CIFSR", 800, False),
+        ]
+    
+        for i, (cmd, timeout, expect_ok) in enumerate(steps):
+            calliopemini.display.show(len(steps) - i - 1)
+            ok, _ = at_cmd(cmd, timeout_ms=timeout, expect_ok=expect_ok)
+            flush_uart()
+    
+            if not ok and expect_ok:
+                calliopemini.display.show(calliopemini.Image.NO)
+                calliopemini.sleep(500)
+                calliopemini.display.clear()
+                return False
+    
         calliopemini.display.show(calliopemini.Image.YES)
         calliopemini.sleep(500)
         calliopemini.display.clear()
@@ -179,125 +190,121 @@ SETUP_WIFI:
     
     def init_uart():
         _UART.init(baudrate=_UART_BAUD, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
-
-    def at_cmd(cmd, expect_ok=True, timeout_ms=1200):
-        _UART.write((cmd + "\r\n").encode("utf-8"))
-        resp = read_until_idle_adaptive(timeout_ms=timeout_ms)
-        if expect_ok and "OK" not in resp:
-            return False, resp
-        return True, resp
-
-    def at_cmd_resp(cmd, timeout_ms=1200):
-        _UART.write((cmd + "\r\n").encode("utf-8"))
-        return read_until_idle_adaptive(timeout_ms=timeout_ms)
     
-    def read_until_idle_adaptive(timeout_ms=3000, min_idle_ms=50, factor=4):
+    def at_cmd(cmd, timeout_ms=1200, expect_ok=True):
+        _UART.write((cmd + "\r\n").encode("utf-8"))
+        resp = uart_read_all(timeout_ms)
+        ok = (("OK" in resp) if expect_ok else True) and ("ERROR" not in resp)
+        return ok, resp
+    
+    def uart_read_all(timeout_ms):
         start = calliopemini.running_time()
-        last_rx = None
-        normal_gap = None
         buf = ""
-    
         while calliopemini.running_time() - start < timeout_ms:
             if _UART.any():
-                chunk = _UART.read()
-                now = calliopemini.running_time()
-    
-                if isinstance(chunk, bytes):
-                    buf += safe_decode(chunk)
-                else:
-                    buf += str(chunk)
-    
-                if last_rx is not None:
-                    gap = now - last_rx
-                    if normal_gap is None:
-                        normal_gap = gap
-                    else:
-                        normal_gap = (normal_gap * 3 + gap) // 4
-                last_rx = now
+                buf += safe_decode(_UART.read())
             else:
-                if buf and last_rx is not None and normal_gap is not None:
-                    idle = calliopemini.running_time() - last_rx
-                    adaptive_idle = max(min_idle_ms, normal_gap * factor)
-                    if idle > adaptive_idle:
-                        break
-                calliopemini.sleep(20)
-    
+                calliopemini.sleep(10)
         return buf
-
+    
     def safe_decode(chunk):
         try:
             return chunk.decode("utf-8")
         except Exception:
             return "".join(chr(b) for b in chunk)
+    
+    def flush_uart(ms=250):
+        start = calliopemini.running_time()
+        while calliopemini.running_time() - start < ms:
+            if _UART.any():
+                _UART.read()
+            calliopemini.sleep(10)
+    
+    def send_cmd_raw(cmd, timeout_ms=3000):
+        resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=timeout_ms)
+        if resp is None:
+            return None
+        return resp.strip()
 
 SEND_AND_WAIT:
   PYTHON: |
-    def send_tcp_command(host, port, payload, timeout_ms=2000):
-        resp = at_cmd_resp('AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)), timeout_ms=1500)
-        if "ERROR" in resp or resp == "":
-            return False, resp
-        payload_line = payload if payload.endswith("\n") else payload + "\n"
-        send_len = len(payload_line)
-        resp = at_cmd_resp("AT+CIPSEND={0}".format(send_len), timeout_ms=600)
+    def send_tcp_command(host, port, payload, timeout_ms=6000):
+        flush_uart(200)
+        ok, resp = at_cmd('AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)),
+                          timeout_ms=2500, expect_ok=False)
+        if "ERROR" in resp or resp.strip() == "":
+            return None
     
+        payload_line = payload if payload.endswith("\n") else payload + "\n"
+        send_len = len(payload_line.encode("utf-8"))
+    
+        ok, resp = at_cmd("AT+CIPSEND={0}".format(send_len), timeout_ms=1500, expect_ok=False)
         if ">" not in resp:
-            more = read_until_idle_adaptive(timeout_ms=600)
-            resp += more
-        if ">" not in resp:
-            at_cmd("AT+CIPCLOSE", timeout_ms=300, expect_ok=False)
-            return False, resp
+            at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
+            return None
     
         _UART.write(payload_line.encode("utf-8"))
-        server_resp = read_until_keyword(timeout_ms = timeout_ms)
+        raw = uart_read_all(timeout_ms)
     
-        at_cmd("AT+CIPCLOSE", timeout_ms=300, expect_ok=False)
-        return True, server_resp
-    
-    def flush_uart():
-        while _UART.any():
-            _UART.read()
-    
-    def read_until_keyword(keyword = "TCPRESPONSE:", timeout_ms=30000):
-        start = calliopemini.running_time()
-        full = ""
+        at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
+        flush_uart(200)
+        out = ""
+        i = 0
         while True:
-            if calliopemini.running_time() - start >= timeout_ms:
-                return full
-            flush_uart()
-            buf = read_until_idle_adaptive(timeout_ms=1000)
-            if not buf:
-              calliopemini.sleep(30)
-              continue
-            full += buf
-            if keyword in full:
-              return full
+            p = raw.find("+IPD,", i)
+            if p == -1:
+                break
+            colon = raw.find(":", p)
+            if colon == -1:
+                break
     
-    def send_cmd_raw(cmd, timeout_ms=3000):
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=timeout_ms)
-        if not ok or not resp:
-            return None
-        return get_clean_response(resp)
+            header = raw[p:colon]           # "+IPD,12" or "+IPD,0,12"
+            parts = header.split(",")
+            try:
+                if len(parts) == 2:
+                    n = int(parts[1])
+                elif len(parts) == 3:
+                    n = int(parts[2])
+                else:
+                    i = colon + 1
+                    continue
+            except:
+                i = colon + 1
+                continue
     
-    def get_clean_response(response):
-        if "TCPRESPONSE: " in response:
-            return response.split("TCPRESPONSE: ", 1)[1].strip()
-        return ""
+            data_start = colon + 1
+            data = raw[data_start:data_start + n]
+            out += data
+    
+            i = data_start + n
+        if out.startswith("LEN:"):
+            nl = out.find("\n")
+            if nl != -1:
+                try:
+                    m = int(out[4:nl].strip())
+                    payload = out[nl + 1:]
+                    if len(payload) < m:
+                        return None
+                    return payload[:m]
+                except:
+                    pass
+        return out if out else raw
 
 SETUP_IBM:
   PYTHON: |
     def init_ibm(token):
-        cmd = "CONFIGURE_IBM {}".format(token)
-        ok, resp = send_tcp_command(_WIFI_IP, _WIFI_PORT, cmd, timeout_ms=3000)
-        if ok and "OK" in resp:
+        resp = send_cmd_raw("CONFIGURE_IBM {}".format(token), timeout_ms=3000)
+
+        if resp and "OK" in resp:
             calliopemini.display.show(calliopemini.Image.YES)
             calliopemini.sleep(500)
             calliopemini.display.clear()
             return True
-        else:
-            calliopemini.display.show(calliopemini.Image.NO)
-            calliopemini.sleep(1000)
-            calliopemini.display.clear()
-            return False
+
+        calliopemini.display.show(calliopemini.Image.NO)
+        calliopemini.sleep(1000)
+        calliopemini.display.clear()
+        return False
 
 CMD_OK:
   PYTHON: |
@@ -309,20 +316,27 @@ CMD_STRING:
   PYTHON: |
     def send_cmd_expect_string(cmd, timeout_ms=3000, strip_prefix=None):
         resp = send_cmd_raw(cmd, timeout_ms)
+
         if not resp or resp.startswith("ERROR"):
             return None
+
         if strip_prefix and resp.startswith(strip_prefix):
             resp = resp[len(strip_prefix):].strip()
+
         return resp
 
 CMD_INT:
   PYTHON: |
     def send_cmd_expect_int(cmd, timeout_ms=3000):
-      resp = send_cmd_raw(cmd, timeout_ms)
-      try:
-        return int(resp)
-      except:
-        return None
+        resp = send_cmd_raw(cmd, timeout_ms)
+
+        if not resp or resp.startswith("ERROR"):
+            return None
+
+        try:
+            return int(resp)
+        except:
+            return None
 
 CMD_LIST:
   PYTHON: |
@@ -330,17 +344,25 @@ CMD_LIST:
         resp = send_cmd_raw(cmd, timeout_ms)
         return extract_list_from_response(resp)
     
+    
     def extract_list_from_response(response):
-        if response is None:
+        if not response:
             return []
+    
         start = response.find("[")
         end = response.find("]", start)
-        if start != -1 and end != -1:
-            inner = response[start + 1:end].strip()
-            if inner == "":
+        if start == -1 or end == -1:
+            return []
+        inner = response[start + 1:end].strip()
+        if not inner:
+            return []
+        parts = [p.strip() for p in inner.split(",") if p.strip() != ""]
+        if '"' in inner:
+            return [x.strip().strip('"') for x in parts]
+        try:
+            return [int(x) for x in parts]
+        except:
+            try:
+                return [float(x) for x in parts]
+            except:
                 return []
-            items = inner.split(",")
-            if '"' in inner:
-                return [x.strip().strip('"') for x in items]
-            return [int(x) for x in items]
-        return []
