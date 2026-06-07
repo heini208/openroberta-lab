@@ -74,4 +74,14 @@
             <field name="PIN1">LED_R</field>
         </block>
     </instance>
+    <instance x="330" y="15">
+        <block type="robConf_qiskit" id="qiskit" intask="true" deletable="false">
+            <field name="SSID">MyWiFi</field>
+            <field name="PASSWORD">password</field>
+            <field name="IP">192.168.1.1</field>
+            <field name="PORT">5000</field>
+            <field name="IBMTOKEN"></field>
+            <field name="PIN1">A1</field>
+        </block>
+    </instance>
 </block_set>
