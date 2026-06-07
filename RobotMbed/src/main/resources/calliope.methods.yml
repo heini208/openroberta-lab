@@ -161,6 +161,7 @@ SETUP_WIFI:
         flush_uart()
     
         if ok and ssid in resp:
+            wifi_tcp_prepare()
             calliopemini.display.show(calliopemini.Image.YES)
             calliopemini.sleep(500)
             calliopemini.display.clear()
@@ -183,10 +184,24 @@ SETUP_WIFI:
                 calliopemini.display.clear()
                 return False
     
+        wifi_tcp_prepare()
         calliopemini.display.show(calliopemini.Image.YES)
         calliopemini.sleep(500)
         calliopemini.display.clear()
         return True
+    
+    def wifi_tcp_prepare():
+        cmds = [
+            "AT+CIPMUX=0",
+            "AT+CIPMODE=0",
+            "AT+CIPDINFO=0",
+            "AT+CIPRECVMODE=0",
+            "AT+SLEEP=0",
+        ]
+    
+        for cmd in cmds:
+            at_cmd(cmd, timeout_ms=700, expect_ok=False)
+            flush_uart(100)
     
     def init_uart():
         _UART.init(baudrate=_UART_BAUD, tx=calliopemini.pin_A1_TX, rx=calliopemini.pin_A1_RX)
@@ -228,67 +243,125 @@ SETUP_WIFI:
 
 SEND_AND_WAIT:
   PYTHON: |
+    def get_ipd_len(header):
+        body = header[5:]
+        before_ip = body.split('"', 1)[0]
+        fields = [x.strip() for x in before_ip.split(",") if x.strip() != ""]
+    
+        try:
+            if len(fields) == 1:
+                return int(fields[0])
+            if int(fields[0]) <= 4:
+                return int(fields[1])
+            return int(fields[0])
+        except:
+            return None
+    
+    def extract_ipd_payload(raw):
+        out = ""
+        i = 0
+    
+        while True:
+            p = raw.find("+IPD,", i)
+            if p == -1:
+                break
+    
+            colon = raw.find(":", p)
+            if colon == -1:
+                break
+    
+            header = raw[p:colon]
+            n = get_ipd_len(header)
+    
+            if n is None:
+                i = colon + 1
+                continue
+    
+            data_start = colon + 1
+            data_end = data_start + n
+    
+            if len(raw) < data_end:
+                break
+    
+            out += raw[data_start:data_end]
+            i = data_end
+    
+        return out
+    
+    def extract_len_payload(out):
+        p = out.find("LEN:")
+        if p == -1:
+            return None
+    
+        nl = out.find("\n", p)
+        if nl == -1:
+            return None
+    
+        try:
+            n = int(out[p + 4:nl].strip())
+        except:
+            return None
+    
+        payload = out[nl + 1:]
+    
+        if len(payload) < n:
+            return None
+    
+        return payload[:n]
+    
+    def read_tcp_response(timeout_ms):
+        start = calliopemini.running_time()
+        raw = ""
+    
+        while calliopemini.running_time() - start < timeout_ms:
+            if _UART.any():
+                raw += safe_decode(_UART.read())
+    
+                out = extract_ipd_payload(raw)
+                payload = extract_len_payload(out)
+    
+                if payload is not None:
+                    return payload
+            else:
+                calliopemini.sleep(10)
+    
+        return None
+    
     def send_tcp_command(host, port, payload, timeout_ms=6000):
         flush_uart(200)
-        ok, resp = at_cmd('AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)),
-                          timeout_ms=2500, expect_ok=False)
+    
+        ok, resp = at_cmd(
+            'AT+CIPSTART="TCP","{0}",{1}'.format(host, int(port)),
+            timeout_ms=2500,
+            expect_ok=False
+        )
+    
         if "ERROR" in resp or resp.strip() == "":
             return None
     
         payload_line = payload if payload.endswith("\n") else payload + "\n"
         send_len = len(payload_line.encode("utf-8"))
     
-        ok, resp = at_cmd("AT+CIPSEND={0}".format(send_len), timeout_ms=1500, expect_ok=False)
+        ok, resp = at_cmd(
+            "AT+CIPSEND={0}".format(send_len),
+            timeout_ms=1500,
+            expect_ok=False
+        )
+    
+        if ">" not in resp:
+            resp += uart_read_all(600)
+    
         if ">" not in resp:
             at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
             return None
     
         _UART.write(payload_line.encode("utf-8"))
-        raw = uart_read_all(timeout_ms)
+        result = read_tcp_response(timeout_ms)
     
         at_cmd("AT+CIPCLOSE", timeout_ms=400, expect_ok=False)
         flush_uart(200)
-        out = ""
-        i = 0
-        while True:
-            p = raw.find("+IPD,", i)
-            if p == -1:
-                break
-            colon = raw.find(":", p)
-            if colon == -1:
-                break
     
-            header = raw[p:colon]           # "+IPD,12" or "+IPD,0,12"
-            parts = header.split(",")
-            try:
-                if len(parts) == 2:
-                    n = int(parts[1])
-                elif len(parts) == 3:
-                    n = int(parts[2])
-                else:
-                    i = colon + 1
-                    continue
-            except:
-                i = colon + 1
-                continue
-    
-            data_start = colon + 1
-            data = raw[data_start:data_start + n]
-            out += data
-    
-            i = data_start + n
-        if out.startswith("LEN:"):
-            nl = out.find("\n")
-            if nl != -1:
-                try:
-                    m = int(out[4:nl].strip())
-                    payload = out[nl + 1:]
-                    if len(payload) < m:
-                        return None
-                    return payload[:m]
-                except:
-                    pass
-        return out if out else raw
+        return result
 
 SETUP_IBM:
   PYTHON: |
@@ -343,7 +416,6 @@ CMD_LIST:
     def send_cmd_expect_list(cmd, timeout_ms=3000):
         resp = send_cmd_raw(cmd, timeout_ms)
         return extract_list_from_response(resp)
-    
     
     def extract_list_from_response(response):
         if not response:
