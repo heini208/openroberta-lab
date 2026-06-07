@@ -893,7 +893,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
     public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
         this.src.add(this.getBean(CodeGeneratorSetupBean.class)
                         .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
+                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
                 "(\"CLONE_CIRCUIT {}\".format(");
         cloneCircuit.circuitId.accept(this);
         this.src.add("), strip_prefix=\"CIRCUIT_ID:\")");
@@ -910,7 +910,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(", ");
         measure.qubit.accept(this);
         this.src.add(", ");
-        measure.classicalBit.accept(this); // new: classical bit argument
+        measure.classicalBit.accept(this);
         this.src.add("))");
         return null;
     }
@@ -921,7 +921,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
                 "(\"MEASURE_ALL {}\".format("); // include circuit ID
-        measureAll.circuitId.accept(this);  // new: send circuit ID
+        measureAll.circuitId.accept(this);
         this.src.add("))");
         return null;
     }
@@ -959,7 +959,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(" {} {}\".format(");
         singleQubitGate.circuitId.accept(this);
         this.src.add(", ");
-        singleQubitGate.qubit.accept(this); // fixed: add target qubit
+        singleQubitGate.qubit.accept(this);
         this.src.add("))");
         return null;
     }
@@ -974,7 +974,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
         this.src.add(" {} {} {}\".format(");
         rotationGate.circuitId.accept(this);
         this.src.add(", ");
-        rotationGate.qubit.accept(this); // fixed: include qubit
+        rotationGate.qubit.accept(this);
         this.src.add(", ");
         rotationGate.angle.accept(this);
         this.src.add("))");
@@ -987,7 +987,7 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
                         .getHelperMethodGenerator()
                         .getHelperMethodName(CalliopeMethods.CMD_OK),
                 "(\"",twoQubitGate.gate," {} {} {}\".format(");
-        twoQubitGate.circuitId.accept(this); // add circuit ID
+        twoQubitGate.circuitId.accept(this);
         this.src.add(", ");
         twoQubitGate.control.accept(this);
         this.src.add(", ");

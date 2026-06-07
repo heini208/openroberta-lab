@@ -81,7 +81,7 @@
             <field name="IP">192.168.1.1</field>
             <field name="PORT">5000</field>
             <field name="IBMTOKEN"></field>
-            <field name="PIN1">A1</field>
+            <field name="PIN1">5</field>
         </block>
     </instance>
 </block_set>
