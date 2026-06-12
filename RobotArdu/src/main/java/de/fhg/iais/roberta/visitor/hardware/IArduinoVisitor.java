@@ -113,12 +113,4 @@ public interface IArduinoVisitor<V> extends IVisitor<V> {
     V visitNeuralNetworkInitClassifyData(NeuralNetworkInitClassifyData nn);
 
     V visitNeuralNetworkClassify(NeuralNetworkClassify nn);
-
-    V visitSimulationJob(SimulationJob job);
-
-    V visitIBMJob(IBMJob job);
-
-    V visitIBMJobResult(IBMJobResult ibmJobResult);
-
-    V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
 }
