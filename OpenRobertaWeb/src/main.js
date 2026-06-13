@@ -24,6 +24,12 @@ require.config({
         'webots.enum': 'libs/webots/enum',
         'webots.wren': 'libs/webots/wrenjs',
         dapjs: 'libs/dapjs/dap.umd',
+        partialFlashingUtils: 'js/helper/partialFlashing/partialFlashingUtils',
+        asyncUtil: 'js/helper/partialFlashing/asyncUtil',
+        microbitConstants: 'js/helper/partialFlashing/microbitConstants',
+        calliopePartialFlashing: 'js/helper/partialFlashing/calliopePartialFlashing',
+        calliopeIntelHex: 'js/helper/partialFlashing/calliopeIntelHex',
+        calliopeDapWrapper: 'js/helper/partialFlashing/calliopeDapWrapper',
 
         'startView.controller': 'js/app/roberta/controller/startView.controller',
         'confDelete.controller': 'js/app/roberta/controller/confDelete.controller',
@@ -315,6 +321,12 @@ require([
     //end connections
     'ace',
     'ace_lang',
+    'partialFlashingUtils',
+    'asyncUtil',
+    'microbitConstants',
+    'calliopePartialFlashing',
+    'calliopeIntelHex',
+    'calliopeDapWrapper',
 ], function (require) {
     //window.Popper = require('popper.js').default;
     window.$ = window.jQuery = require('jquery');
@@ -356,6 +368,12 @@ require([
     startViewController = require('startView.controller');
     connectionController = require('connection.controller');
     aceEditor = require('aceEditor');
+    partialFlashingUtils = require('partialFlashingUtils');
+    asyncUtil = require('asyncUtil');
+    microbitConstants = require('microbitConstants');
+    calliopePartialFlashing = require('calliopePartialFlashing');
+    calliopeIntelHex = require('calliopeIntelHex');
+    calliopeDapWrapper = require('calliopeDapWrapper');
 
     $(document).ready(WRAP.wrapTotal(init, 'page init'));
 });
