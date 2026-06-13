@@ -111,30 +111,11 @@ function hasUniversalTargetBlocks(lines: string[]): boolean {
 function parseUniversalTargetId(line: string): number | undefined {
     const length = getRecordLength(line);
 
-    if (length >= 4) {
-        const b0 = parseByte(line, 9);
-        const b1 = parseByte(line, 11);
-        const b2 = parseByte(line, 13);
-        const b3 = parseByte(line, 15);
-        const highFirst = ((b0 << 24) | (b1 << 16) | (b2 << 8) | b3) >>> 0;
-        const lowFirst = ((b3 << 24) | (b2 << 16) | (b1 << 8) | b0) >>> 0;
-
-        if ((highFirst & 0xffff) === highFirst) {
-            return highFirst;
-        }
-
-        if ((lowFirst & 0xffff) === lowFirst) {
-            return lowFirst;
-        }
-
-        return highFirst;
+    if (length < 2) {
+        return undefined;
     }
 
-    if (length >= 2) {
-        return (parseByte(line, 9) << 8) | parseByte(line, 11);
-    }
-
-    return undefined;
+    return (parseByte(line, 9) << 8) | parseByte(line, 11);
 }
 
 function formatHex(value: number): string {
