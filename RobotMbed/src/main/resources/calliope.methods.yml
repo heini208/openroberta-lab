@@ -157,7 +157,7 @@ SETUP_WIFI:
         at_cmd("ATE0", timeout_ms=250, expect_ok=False)
         flush_uart()
     
-        ok, resp = at_cmd("AT+CWJAP_CUR?", timeout_ms=2000, expect_ok=True)
+        ok, resp = at_cmd("AT+CWJAP_CUR?", timeout_ms=5000, expect_ok=False)
         flush_uart()
     
         if ok and ssid in resp:
@@ -168,7 +168,7 @@ SETUP_WIFI:
             return True
     
         steps = [
-            ("AT+CWMODE_CUR=1", 500, True),
+            ("AT+CWMODE_CUR=1", 3000, False),
             ('AT+CWJAP_CUR="{0}","{1}"'.format(ssid, password), 20000, True),
             ("AT+CIFSR", 800, False),
         ]
