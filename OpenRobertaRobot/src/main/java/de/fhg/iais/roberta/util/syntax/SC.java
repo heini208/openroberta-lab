@@ -42,9 +42,7 @@ public interface SC {
     String HUMIDITY = "HUMIDITY";
     String TEMPERATURE = "TEMPERATURE";
     String SERIAL = "SERIAL";
-    String WIFI = "WIFI";
     String QISKIT = "QISKIT";
-    String IBM = "IBM";
     String ANALOG = "ANALOG";
     String DIGITAL = "DIGITAL";
     String OBSTACLE = "OBSTACLE";

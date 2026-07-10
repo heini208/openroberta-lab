@@ -10,11 +10,4 @@ public enum CalliopeMethods {
     SERVO_GET_ANGLE,
     RECEIVE_MESSAGE,
     GET_ROTATION,
-    SETUP_WIFI,
-    SETUP_IBM,
-    SEND_AND_WAIT,
-    CMD_OK,
-    CMD_STRING,
-    CMD_INT,
-    CMD_LIST
 }

@@ -116,18 +116,17 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     @Override
     protected void visitorGenerateGlobalVariables() {
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
-            ConfigurationComponent wifiModule = getWifiOrQiskitModule();
-            if (wifiModule != null) {
-                nlIndent();
-                this.src.add("_SSID = \"", wifiModule.getOptProperty("SSID"),"\"").nlI();
-                this.src.add("_WIFI_PASSWORD = \"", wifiModule.getOptProperty("PASSWORD"),"\"").nlI();
-                this.src.add("_WIFI_IP = \"", wifiModule.getOptProperty("IP"),"\"").nlI();
-                this.src.add("_WIFI_PORT = ", wifiModule.getOptProperty("PORT")).nlI();
-                this.src.add("_IBM_TOKEN = \"", wifiModule.getOptProperty("IBMTOKEN"),"\"").nlI();
-                this.src.add("_UART_BAUD = 115200").nlI();
-                this.src.add("_UART = calliopemini.uart").nlI();
-            }
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
+            nlIndent();
+            this.src.add("_qiskit_circuits = {}");
+            nlIndent();
+            this.src.add("_qiskit_jobs = {}");
+            nlIndent();
+            this.src.add("_qiskit_next_circuit_id = 0");
+            nlIndent();
+            this.src.add("_qiskit_next_job_id = 0");
+            nlIndent();
+            nlIndent();
         }
             super.visitorGenerateGlobalVariables();
     }
@@ -147,14 +146,6 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
             this.src.add(this.firmware, ".", PIN_MAP.get("C16"), ".set_analog_period(20)");
             nlIndent();
             this.src.add(this.firmware, ".", PIN_MAP.get("C17"), ".set_analog_period(20)");
-            nlIndent();
-        }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.WIFI) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
-            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_WIFI), "(_SSID, _WIFI_PASSWORD)");
-            nlIndent();
-        }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.IBM)){
-            this.src.add(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(CalliopeMethods.SETUP_IBM), "(_IBM_TOKEN)");
             nlIndent();
         }
     }
@@ -766,233 +757,77 @@ public class CalliopeV3PythonVisitor extends MbedV2PythonVisitor implements ICal
 
     @Override
     public Void visitSimulationJob(SimulationJob sensor) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"SUPERPOSITION_SIM {}\".format(");
-        sensor.qbits.accept(this);
-        this.src.add("), 2500)");
-        return null;
-    }
-
-    @Override
-    public Void visitIBMJob(IBMJob job) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
-                "(\"SUPERPOSITION_IBM {}\".format(");
-        job.qbits.accept(this);
-        this.src.add("), 30000, strip_prefix=\"JOBID:\")");
-        return null;
-    }
-
-    private ConfigurationComponent getWifiOrQiskitModule() {
-        for ( ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values() ) {
-            if ( component.componentType.equals(SC.QISKIT) ) {
-                return component;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
-                "(\"JOB_STATUS_IBM {}\".format(");
-        ibmJobStatus.id.accept(this);
-        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
-        // Run circuit simulation, expect OK
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
-                "(\"RUN_CIRCUIT_SIM {}\".format(");
-        runCircuitSim.circuitId.accept(this);
-        this.src.add("), strip_prefix=\"JOBID:\")");
-        return null;
-    }
-
-    @Override
-    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
-        // Run IBM circuit, expect OK
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RUN_CIRCUIT_IBM {}\".format(");
-        runCircuitIBM.circuitId.accept(this);
-        this.src.add("), strip_prefix=\"JOBID:\")");
         return null;
     }
 
     @Override
     public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_SAMPLE {}\".format(");
-        getJobResultSample.jobId.accept(this);
-        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitGetJobResultStates(GetJobResultStates getJobResultStates) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_STATES {}\".format(");
-        getJobResultStates.jobId.accept(this);
-        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitGetJobResultCounts(GetJobResultCounts getJobResultCounts) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_COUNTS {}\".format(");
-        getJobResultCounts.jobId.accept(this);
-        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitGetJobResultProbabilities(GetJobResultProbabilities getJobResultProbabilities) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_LIST),
-                "(\"GET_JOB_PROBABILITIES {}\".format(");
-        getJobResultProbabilities.jobId.accept(this);
-        this.src.add("), 30000)");
         return null;
     }
 
     @Override
     public Void visitCreateCircuit(CreateCircuit createCircuit) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
-                "(\"CREATE_CIRCUIT {} {}\".format(");
-
-        createCircuit.numQubits.accept(this);
-        this.src.add(", ");
-        createCircuit.numClbits.accept(this);
-
-        this.src.add("), strip_prefix=\"CIRCUIT_ID:\")");
         return null;
     }
 
     @Override
     public Void visitCloneCircuit(CloneCircuit cloneCircuit) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_STRING),
-                "(\"CLONE_CIRCUIT {}\".format(");
-        cloneCircuit.circuitId.accept(this);
-        this.src.add("), strip_prefix=\"CIRCUIT_ID:\")");
         return null;
     }
 
     @Override
     public Void visitMeasureQubit(MeasureQubit measure) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"MEASURE {} {} {}\".format("); // circuit_id, qubit, clbit
-        measure.circuitId.accept(this);
-        this.src.add(", ");
-        measure.qubit.accept(this);
-        this.src.add(", ");
-        measure.classicalBit.accept(this);
-        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitMeasureAllQubits(MeasureAllQubits measureAll) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"MEASURE_ALL {}\".format("); // include circuit ID
-        measureAll.circuitId.accept(this);
-        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitDeleteCircuit(DeleteCircuit deleteCircuit) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"DELETE_CIRCUIT {}\".format(");
-        deleteCircuit.circuitId.accept(this);
-        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitResetCircuit(ResetCircuit resetCircuit) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"RESET_CIRCUIT {}\".format(");
-        resetCircuit.circuitId.accept(this);
-        this.src.add("))");
         return null;
     }
 
     // Gates
     @Override
     public Void visitSingleQubitGate(SingleQubitGate singleQubitGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"");
-        this.src.add(singleQubitGate.gate);
-        this.src.add(" {} {}\".format(");
-        singleQubitGate.circuitId.accept(this);
-        this.src.add(", ");
-        singleQubitGate.qubit.accept(this);
-        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitRotationGate(RotationGate rotationGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"");
-        this.src.add(rotationGate.gate);
-        this.src.add(" {} {} {}\".format(");
-        rotationGate.circuitId.accept(this);
-        this.src.add(", ");
-        rotationGate.qubit.accept(this);
-        this.src.add(", ");
-        rotationGate.angle.accept(this);
-        this.src.add("))");
         return null;
     }
 
     @Override
     public Void visitTwoQubitGate(TwoQubitGate twoQubitGate) {
-        this.src.add(this.getBean(CodeGeneratorSetupBean.class)
-                        .getHelperMethodGenerator()
-                        .getHelperMethodName(CalliopeMethods.CMD_OK),
-                "(\"",twoQubitGate.gate," {} {} {}\".format(");
-        twoQubitGate.circuitId.accept(this);
-        this.src.add(", ");
-        twoQubitGate.control.accept(this);
-        this.src.add(", ");
-        twoQubitGate.target.accept(this);
-        this.src.add("))");
         return null;
     }
 

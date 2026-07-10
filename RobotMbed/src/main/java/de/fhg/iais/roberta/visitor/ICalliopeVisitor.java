@@ -94,13 +94,7 @@ public interface ICalliopeVisitor<V> extends IMbedV2Visitor<V> {
 
     V visitSimulationJob(SimulationJob job);
 
-    V visitIBMJob(IBMJob job);
-
-    V visitIBMJobStatus(IBMJobStatus ibmJobStatus);
-
     V visitRunCircuitSim(RunCircuitSim runCircuitSim);
-
-    V visitRunCircuitIBM(RunCircuitIBM runCircuitIBM);
 
     V visitGetJobResultSample(GetJobResultSample getJobResultSample);
 

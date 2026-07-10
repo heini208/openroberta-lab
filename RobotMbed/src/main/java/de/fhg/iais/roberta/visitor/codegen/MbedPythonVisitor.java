@@ -447,6 +447,10 @@ public abstract class MbedPythonVisitor extends AbstractPythonVisitor implements
             if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.HUMIDITY) ) {
                 this.src.add("from sht31 import SHT31");
             }
+            if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.QISKIT) ) {
+                this.src.add("from microqiskit import QuantumCircuit, simulate");
+                nlIndent();
+            }
         }
         nlIndent();
     }

@@ -12,7 +12,6 @@ import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.sensor.mbed.*;
 import org.apache.commons.text.WordUtils;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
@@ -1628,25 +1627,10 @@ public final class CalliopeCppVisitor extends AbstractCppVisitor implements ICal
     }
 
     @Override
-    public Void visitIBMJob(IBMJob job) {
-        return null;
-    }
-
-
-    @Override
-    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        return null;
-    }
-
-    @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
         return null;
     }
 
-    @Override
-    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
-        return null;
-    }
 
     @Override
     public Void visitGetJobResultSample(GetJobResultSample getJobResultSample) {

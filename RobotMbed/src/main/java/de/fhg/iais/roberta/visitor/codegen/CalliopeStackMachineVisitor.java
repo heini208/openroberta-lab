@@ -29,7 +29,6 @@ import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
@@ -243,23 +242,7 @@ public class CalliopeStackMachineVisitor extends MbedV2StackMachineVisitor imple
     }
 
     @Override
-    public Void visitIBMJob(IBMJob job) {
-        return null;
-    }
-
-
-    @Override
-    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        return null;
-    }
-
-    @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
-        return null;
-    }
-
-    @Override
-    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
         return null;
     }
 

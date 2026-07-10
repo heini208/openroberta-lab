@@ -32,7 +32,6 @@ import de.fhg.iais.roberta.syntax.action.mbed.SwitchLedMatrixAction;
 import de.fhg.iais.roberta.syntax.action.mbed.calliopeV3.*;
 import de.fhg.iais.roberta.syntax.action.mbed.microbitV2.SoundToggleAction;
 import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitSim;
-import de.fhg.iais.roberta.syntax.sensor.mbed.RunCircuitIBM;
 import de.fhg.iais.roberta.syntax.sensor.mbed.GetJobResultSample;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CreateCircuit;
 import de.fhg.iais.roberta.syntax.sensor.mbed.CloneCircuit;
@@ -454,23 +453,7 @@ public class CalliopeCommonValidatorAndCollectorVisitor extends MbedV2ValidatorA
     }
 
     @Override
-    public Void visitIBMJob(IBMJob job) {
-        return null;
-    }
-
-
-    @Override
-    public Void visitIBMJobStatus(IBMJobStatus ibmJobStatus) {
-        return null;
-    }
-
-    @Override
     public Void visitRunCircuitSim(RunCircuitSim runCircuitSim) {
-        return null;
-    }
-
-    @Override
-    public Void visitRunCircuitIBM(RunCircuitIBM runCircuitIBM) {
         return null;
     }
 

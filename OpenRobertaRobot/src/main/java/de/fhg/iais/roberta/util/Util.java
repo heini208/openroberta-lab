@@ -56,20 +56,17 @@ public class Util {
     private static final Pattern HEX_VALUE_PATTERN = Pattern.compile("^#[0-9a-fA-F]+$");
     private static final Pattern UNSAFE_CHAR_PATTERN = Pattern.compile("^.*[;,\n\t\r].*$", Pattern.MULTILINE);
     private static final String INVALID = "invalid";
-    private static final Pattern WIFI_SSID_PATTERN = Pattern.compile("^[\\w\\s!@#$%^&*()\\-+=\\[\\]{}|;:,.<>?/~`'\"\u2019]+$");
-    private static final Pattern IP_ADDRESS_PATTERN = Pattern.compile("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
-
     /**
      * YAML parser. NOT thread-safe!
      */
     private static final Yaml YAML;
     private static final String[] reservedWords = new String[] {
-        //  @formatter:off
-        "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum",
-        "extends", "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native",
-        "new", "null", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
-        "throw", "throws", "transient", "true", "try", "void", "volatile", "while"
-        //  @formatter:on
+            //  @formatter:off
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum",
+            "extends", "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native",
+            "new", "null", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
+            "throw", "throws", "transient", "true", "try", "void", "volatile", "while"
+            //  @formatter:on
     };
     private static final AtomicInteger errorTicketNumber = new AtomicInteger(0);
     static {
@@ -165,10 +162,10 @@ public class Util {
             return new RobotFactory(pluginProperties);
         } catch ( Exception e ) {
             throw new DbcException(
-                " factory for robot plugin "
-                    + robotName
-                    + " could not be build. Plugin-jar not on the classpath? Invalid properties? Problems with validators? Server does NOT start",
-                e);
+                    " factory for robot plugin "
+                            + robotName
+                            + " could not be build. Plugin-jar not on the classpath? Invalid properties? Problems with validators? Server does NOT start",
+                    e);
         }
     }
 
@@ -298,7 +295,7 @@ public class Util {
         }
         return true;
     }
-    
+
     /**
      * Check whether a String is a valid Java identifier. It is checked also, that no reserved word is used
      *
@@ -597,10 +594,10 @@ public class Util {
      * @param isNativeEditorCode flag to distinguish error source. True: Source code editor, False: NEPO generated
      */
     public static void logCrosscompilerError(
-        Logger reporterLogger,
-        String crosscompilerResponse,
-        String crosscompilerSourceForDebuggingOnly,
-        boolean isNativeEditorCode) //
+            Logger reporterLogger,
+            String crosscompilerResponse,
+            String crosscompilerSourceForDebuggingOnly,
+            boolean isNativeEditorCode) //
     {
         if ( !isNativeEditorCode ) {
             reporterLogger.error("crosscompilation of NEPO generated program failed. Messages are logged to logger 'crosscompiler_error'");
@@ -702,26 +699,7 @@ public class Util {
         for ( Map.Entry<String, String> pair : componentProperties.entrySet() ) {
             String key = pair.getKey();
             String value = pair.getValue();
-
-            // Check if this is a WiFi-related property
-            boolean isWifiProperty = key.contains("WIFI") || key.contains("SSID") ||
-                    key.contains("PASSWORD") || key.equals("SERVER_IP") ||
-                    key.equals("SERVER_PORT") || key.contains("IP");
-
-            boolean isValid;
-            if (key.equals("NAO_FILENAME")) {
-                isValid = FILENAME_PATTERN.matcher(value).matches();
-            } else if (isWifiProperty) {
-                // For WiFi properties, allow SSID pattern or IP pattern
-                isValid = WIFI_SSID_PATTERN.matcher(value).matches() ||
-                        IP_ADDRESS_PATTERN.matcher(value).matches() ||
-                        NUMBER_PATTERN.matcher(value).matches();
-            } else {
-                isValid = CONFIG_NAME_PATTERN.matcher(value).matches() ||
-                        NUMBER_PATTERN.matcher(value).matches() ||
-                        HEX_VALUE_PATTERN.matcher(value).matches();
-            }
-
+            boolean isValid = key.equals("NAO_FILENAME") ? FILENAME_PATTERN.matcher(value).matches() : CONFIG_NAME_PATTERN.matcher(value).matches() || NUMBER_PATTERN.matcher(value).matches() || HEX_VALUE_PATTERN.matcher(value).matches();
             if ( !isValid ) {
                 try {
                     pair.setValue(INVALID);
@@ -750,10 +728,7 @@ public class Util {
      * @return the original value or if NUM_CONST, "0", otherwise "invalid" if the value does not match a pattern.
      */
     public static String sanitizeProgramProperty(String value, String blockName) {
-        boolean isValid = PROGRAM_NAME_PATTERN.matcher(value).matches()
-                || NUMBER_PATTERN.matcher(value).matches()
-                || WIFI_SSID_PATTERN.matcher(value).matches()  // Add this
-                || IP_ADDRESS_PATTERN.matcher(value).matches(); // Add this
+        boolean isValid = PROGRAM_NAME_PATTERN.matcher(value).matches() || NUMBER_PATTERN.matcher(value).matches();
         if ( !isValid ) {
             value = blockName.equals("NUM_CONST") ? "0" : INVALID;
         }
